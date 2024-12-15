@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import app from '../firebaseConfig';
 import tw from '../tailwind';
@@ -11,11 +12,13 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
 
+    const navigation = useNavigation();
+
     const getCustomErrorMessage = (errorCode) => {
         const errorMessages = {
             'auth/invalid-email': 'The email address is not valid.',
             'auth/user-not-found': 'No account found with this email.',
-            'auth/wrong-password': 'Incorrect password. Please try again.',
+            'auth/invalid-credential': 'Incorrect password. Please try again.',
             'auth/email-already-in-use': 'This email is already registered.',
             'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
             'auth/missing-password': 'Password is required. Please enter a password.',
@@ -37,12 +40,15 @@ const Login = () => {
     const handleLogin = () => {
         Keyboard.dismiss();
         signInWithEmailAndPassword(auth, email, password)
-            .then(() => alert('Logged in successfully!'))
+            .then(() => {
+                navigation.navigate('Home');
+            })
             .catch((error) => {
                 const errorMessage = getCustomErrorMessage(error.code);
-                alert(errorMessage);
+                Alert.alert('Login Failed', errorMessage);
             });
     };
+
 
     return (
         <View style={tw`flex-1 justify-center items-center bg-slate-900 px-4`}>
