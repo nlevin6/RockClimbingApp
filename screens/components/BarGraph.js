@@ -1,37 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from 'victory-native';
+import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import tw from '../../tailwind';
+import app from '../../firebaseConfig';
+
+const db = getFirestore(app);
 
 const BarGraph = () => {
     const [activeView, setActiveView] = useState('Day');
-    const [selectedBar, setSelectedBar] = useState(null);
+    const [climbData, setClimbData] = useState([]);
 
-    const data = {
-        Day: [
-            { day: 'Mon', value: 3 },
-            { day: 'Tue', value: 2 },
-            { day: 'Wed', value: 5 },
-            { day: 'Thu', value: 1 },
-            { day: 'Fri', value: 6 },
-            { day: 'Sat', value: 2 },
-            { day: 'Sun', value: 4 },
-        ],
-        Month: [
-            { day: 'Jan', value: 10 },
-            { day: 'Feb', value: 15 },
-            { day: 'Mar', value: 25 },
-            { day: 'Apr', value: 20 },
-            { day: 'May', value: 30 },
-            { day: 'Jun', value: 18 },
-            { day: 'Jul', value: 18 },
-        ],
-        Year: [
-            { day: '2020', value: 80 },
-            { day: '2021', value: 120 },
-            { day: '2022', value: 150 },
-            { day: '2023', value: 170 },
-        ],
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
+            const data = snapshot.docs.map((doc) => doc.data());
+            processClimbData(data);
+        });
+        return () => unsubscribe();
+    }, [activeView]);
+
+    const processClimbData = (data) => {
+        const today = new Date();
+        let aggregatedData;
+
+        if (activeView === 'Day') {
+            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            const dayCounts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+            data.forEach((climb) => {
+                const climbDate = new Date(climb.date);
+                if (climbDate >= startOfWeek && climbDate <= endOfWeek) {
+                    const day = climbDate.getDay();
+                    const dayMapping = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    dayCounts[dayMapping[day]] += 1;
+                }
+            });
+            aggregatedData = Object.keys(dayCounts).map((key) => ({ day: key, value: dayCounts[key] }));
+        } else if (activeView === 'Month') {
+            const currentYear = today.getFullYear();
+            const monthCounts = Array(12).fill(0);
+
+            data.forEach((climb) => {
+                const climbDate = new Date(climb.date);
+                if (climbDate.getFullYear() === currentYear) {
+                    const month = climbDate.getMonth();
+                    monthCounts[month] += 1;
+                }
+            });
+
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            aggregatedData = monthCounts.map((value, index) => ({ day: monthNames[index], value }));
+        } else if (activeView === 'Year') {
+            const yearCounts = {};
+            data.forEach((climb) => {
+                const year = new Date(climb.date).getFullYear();
+                yearCounts[year] = (yearCounts[year] || 0) + 1;
+            });
+            aggregatedData = Object.keys(yearCounts).map((key) => ({ day: key, value: yearCounts[key] }));
+        }
+
+        setClimbData(aggregatedData);
     };
 
     return (
@@ -40,10 +70,7 @@ const BarGraph = () => {
                 {['Day', 'Month', 'Year'].map((view) => (
                     <TouchableOpacity
                         key={view}
-                        onPress={() => {
-                            setActiveView(view);
-                            setSelectedBar(null); // Reset selected bar
-                        }}
+                        onPress={() => setActiveView(view)}
                         style={tw`px-4 py-2 mx-2 rounded-2xl ${
                             activeView === view ? 'bg-violet-600' : 'bg-gray-700'
                         }`}
@@ -53,48 +80,24 @@ const BarGraph = () => {
                 ))}
             </View>
 
-            <VictoryChart
-                domainPadding={{ x: 20 }}
-                padding={{ top: 30, bottom: 50, left: 30, right: 30 }}
-                domain={{
-                    y: [0, Math.max.apply(null, data[activeView].map((d) => d.value)) + 5],
-                }}
-            >
+            <VictoryChart domainPadding={{ x: 20 }}>
                 <VictoryAxis
                     style={{
                         axis: { stroke: '#fff', strokeWidth: 2 },
                         tickLabels: { fontSize: 14, fill: '#fff' },
                     }}
                 />
-
                 <VictoryBar
-                    data={data[activeView]}
+                    data={climbData}
                     x="day"
                     y="value"
                     barWidth={30}
                     cornerRadius={{ top: 5 }}
                     style={{
-                        data: { fill: 'rgb(167 139 250)' },
+                        data: { fill: 'rgb(124, 58, 237)' },
                     }}
-                    events={[
-                        {
-                            target: 'data',
-                            eventHandlers: {
-                                onPress: (_, props) => {
-                                    setSelectedBar(props.index);
-                                },
-                            },
-                        },
-                    ]}
-                    labels={({ index, datum }) =>
-                        selectedBar === index ? `${datum.value}` : ''
-                    }
-                    labelComponent={
-                        <VictoryLabel
-                            style={{ fontSize: 12, fill: '#fff', opacity: 1 }}
-                            dy={-10}
-                        />
-                    }
+                    labels={({ datum }) => `${datum.value}`}
+                    labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white' }} />}
                 />
             </VictoryChart>
         </View>
