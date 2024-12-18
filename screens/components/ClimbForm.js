@@ -51,6 +51,13 @@ const ClimbForm = ({ navigation }) => {
         }
     }, [month, year]);
 
+    const resetDropdowns = (except) => {
+        if (except !== 'grade') setGradeOpen(false);
+        if (except !== 'day') setDayOpen(false);
+        if (except !== 'month') setMonthOpen(false);
+        if (except !== 'year') setYearOpen(false);
+    };
+
     const handleSubmit = async () => {
         if (!grade || !day || !month || !year) {
             Alert.alert('Error', 'Please select a grade and a valid date before submitting.');
@@ -79,10 +86,13 @@ const ClimbForm = ({ navigation }) => {
                 open={gradeOpen}
                 value={grade}
                 items={gradeItems}
-                setOpen={setGradeOpen}
+                setOpen={(open) => {
+                    resetDropdowns('grade');
+                    setGradeOpen(open);
+                }}
                 setValue={setGrade}
                 setItems={setGradeItems}
-                style={tw`mb-4`}
+                zIndex={3000}
             />
 
             <Text style={tw`text-white mb-2 text-lg font-bold`}>Date Completed:</Text>
@@ -93,9 +103,13 @@ const ClimbForm = ({ navigation }) => {
                         open={dayOpen}
                         value={day}
                         items={dayItems}
-                        setOpen={setDayOpen}
+                        setOpen={(open) => {
+                            resetDropdowns('day');
+                            setDayOpen(open);
+                        }}
                         setValue={setDay}
                         setItems={setDayItems}
+                        zIndex={2000}
                     />
                 </View>
 
@@ -105,9 +119,13 @@ const ClimbForm = ({ navigation }) => {
                         open={monthOpen}
                         value={month}
                         items={monthItems}
-                        setOpen={setMonthOpen}
+                        setOpen={(open) => {
+                            resetDropdowns('month');
+                            setMonthOpen(open);
+                        }}
                         setValue={setMonth}
                         setItems={setMonthItems}
+                        zIndex={1500}
                     />
                 </View>
 
@@ -117,9 +135,13 @@ const ClimbForm = ({ navigation }) => {
                         open={yearOpen}
                         value={year}
                         items={yearItems}
-                        setOpen={setYearOpen}
+                        setOpen={(open) => {
+                            resetDropdowns('year');
+                            setYearOpen(open);
+                        }}
                         setValue={setYear}
                         setItems={setYearItems}
+                        zIndex={1000}
                     />
                 </View>
             </View>
