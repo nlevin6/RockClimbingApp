@@ -1,19 +1,25 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import BarGraph from './components/BarGraph';
 import tw from '../tailwind';
 
 const Home = () => {
     return (
-        <View style={tw`flex-1 bg-slate-900 justify-center items-center`}>
-            {/* BarGraph is centered */}
-            <View style={tw`relative w-full`}>
-                <BarGraph />
-                <TouchableOpacity style={tw`absolute top-2 right-2 bg-gray-300 p-2 rounded`}>
-                    <Text style={tw`text-xs font-bold`}>Weekly/Monthly/Yearly</Text>
-                </TouchableOpacity>
+        <ScrollView style={tw`flex-1 bg-slate-900`}>
+            <View style={tw`flex-1`}>
+                <View style={tw`mt-12 mb-8`}>
+                    <BarGraph />
+                </View>
+
+                <View style={tw`bg-gray-800 p-4 rounded-t-3xl`}>
+                    <Text style={tw`text-white text-xl font-bold mb-2`}>Climbing Stats</Text>
+                    <View style={tw`border-t border-gray-600 my-2`} />
+                    <Text style={tw`text-gray-400 text-sm`}>
+                        Placeholder for climbing statistics categories.
+                    </Text>
+                </View>
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
