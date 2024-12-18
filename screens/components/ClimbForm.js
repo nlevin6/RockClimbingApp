@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import tw from '../tailwind';
-import app from '../firebaseConfig';
+import tw from '../../tailwind';
+import app from '../../firebaseConfig';
 
 const db = getFirestore(app);
 
-const AddClimb = ({ navigation }) => {
+const ClimbForm = ({ navigation }) => {
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.getMonth() + 1;
@@ -51,27 +51,6 @@ const AddClimb = ({ navigation }) => {
         }
     }, [month, year]);
 
-    const onGradeOpen = () => {
-        setDayOpen(false);
-        setMonthOpen(false);
-        setYearOpen(false);
-    };
-    const onDayOpen = () => {
-        setGradeOpen(false);
-        setMonthOpen(false);
-        setYearOpen(false);
-    };
-    const onMonthOpen = () => {
-        setGradeOpen(false);
-        setDayOpen(false);
-        setYearOpen(false);
-    };
-    const onYearOpen = () => {
-        setGradeOpen(false);
-        setDayOpen(false);
-        setMonthOpen(false);
-    };
-
     const handleSubmit = async () => {
         if (!grade || !day || !month || !year) {
             Alert.alert('Error', 'Please select a grade and a valid date before submitting.');
@@ -104,7 +83,6 @@ const AddClimb = ({ navigation }) => {
                 setValue={setGrade}
                 setItems={setGradeItems}
                 style={tw`mb-4`}
-                onOpen={onGradeOpen}
             />
 
             <Text style={tw`text-white mb-2 text-lg font-bold`}>Date Completed:</Text>
@@ -118,7 +96,6 @@ const AddClimb = ({ navigation }) => {
                         setOpen={setDayOpen}
                         setValue={setDay}
                         setItems={setDayItems}
-                        onOpen={onDayOpen}
                     />
                 </View>
 
@@ -131,7 +108,6 @@ const AddClimb = ({ navigation }) => {
                         setOpen={setMonthOpen}
                         setValue={setMonth}
                         setItems={setMonthItems}
-                        onOpen={onMonthOpen}
                     />
                 </View>
 
@@ -144,7 +120,6 @@ const AddClimb = ({ navigation }) => {
                         setOpen={setYearOpen}
                         setValue={setYear}
                         setItems={setYearItems}
-                        onOpen={onYearOpen}
                     />
                 </View>
             </View>
@@ -161,4 +136,4 @@ const AddClimb = ({ navigation }) => {
     );
 };
 
-export default AddClimb;
+export default ClimbForm;

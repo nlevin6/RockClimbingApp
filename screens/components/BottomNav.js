@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import Home from '../Home';
-import AddClimb from '../AddClimb';
+import ManageClimb from '../ManageClimb';
 import Settings from '../Settings';
 
 const Tab = createBottomTabNavigator();
@@ -17,7 +17,7 @@ const BottomNav = () => {
 
                     if (route.name === 'Home') {
                         iconName = 'home';
-                    } else if (route.name === 'Add Climb') {
+                    } else if (route.name === 'Manage Climbs') {
                         iconName = 'add-circle';
                     } else if (route.name === 'Settings') {
                         iconName = 'settings';
@@ -30,7 +30,7 @@ const BottomNav = () => {
             })}
         >
             <Tab.Screen name="Home" component={Home} />
-            <Tab.Screen name="Add Climb" component={AddClimb} />
+            <Tab.Screen name="Manage Climbs" component={ManageClimb} />
             <Tab.Screen name="Settings" component={Settings} />
         </Tab.Navigator>
     );
