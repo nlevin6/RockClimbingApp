@@ -97,7 +97,7 @@ const BarGraph = () => {
             </View>
 
             <View style={tw`items-center`}>
-                <VictoryChart domainPadding={{ x: 30 }} padding={{ top: 20, bottom: 60, left: 20, right: 20 }}>
+                <VictoryChart domainPadding={{ x: 30 }} padding={{ top: 20, bottom: 30, left: 20, right: 20 }}>
                     <VictoryAxis
                         style={{
                             axis: { stroke: '#fff', strokeWidth: 2 },

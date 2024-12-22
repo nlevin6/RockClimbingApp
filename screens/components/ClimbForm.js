@@ -87,7 +87,6 @@ const ClimbForm = ({ navigation }) => {
                 date: selectedDate.toISOString(),
             });
             Alert.alert('Success', 'Climb added successfully!');
-            navigation.goBack();
         } catch (error) {
             Alert.alert('Error', 'Failed to add climb. Please try again.');
             console.error(error);
