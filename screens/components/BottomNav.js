@@ -12,15 +12,15 @@ const BottomNav = () => {
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
-                tabBarIcon: ({ color, size }) => {
+                tabBarIcon: ({ color, size, focused }) => {
                     let iconName;
 
                     if (route.name === 'Home') {
-                        iconName = 'home';
+                        iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Manage Climbs') {
-                        iconName = 'add-circle';
+                        iconName = focused ? 'add-circle' : 'add-circle-outline';
                     } else if (route.name === 'Settings') {
-                        iconName = 'settings';
+                        iconName = focused ? 'settings' : 'settings-outline';
                     }
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
