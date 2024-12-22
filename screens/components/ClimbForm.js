@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
 
@@ -13,8 +14,8 @@ const ClimbForm = ({ navigation }) => {
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
 
-
-
+    const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
+    const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
     const [grade, setGrade] = useState('V1');
     const [gradeOpen, setGradeOpen] = useState(false);
@@ -95,8 +96,7 @@ const ClimbForm = ({ navigation }) => {
 
     return (
         <View style={tw`p-4 bg-slate-900`}>
-            <Text style={tw`text-violet-400 mb-2 text-xl font-bold`}>Add Climb</Text>
-            <Text style={tw`text-violet-400 mb-1 text-base font-bold`}>Grade:</Text>
+            <Text style={tw`text-violet-600 mb-2 text-xl font-bold`}>Add Climb</Text>
             <DropDownPicker
                 open={gradeOpen}
                 value={grade}
@@ -107,11 +107,22 @@ const ClimbForm = ({ navigation }) => {
                 }}
                 setValue={setGrade}
                 setItems={setGradeItems}
+                placeholder="Select Grade"
+                style={[
+                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                dropDownContainerStyle={[
+                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                textStyle={[
+                    tw`text-violet-200`,
+                ]}
+                ArrowDownIconComponent={CustomArrowDown}
+                ArrowUpIconComponent={CustomArrowUp}
                 zIndex={3000}
             />
 
-            <Text style={tw`text-violet-400 mt-2 mb-1 text-base font-bold`}>Date Completed:</Text>
-            <View style={tw`flex-row justify-between`}>
+            <View style={tw`flex-row justify-between mt-4`}>
                 <View style={[tw`flex-1 mr-1`, { zIndex: 2000 }]}>
                     <DropDownPicker
                         open={dayOpen}
@@ -123,6 +134,18 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setDay}
                         setItems={setDayItems}
+                        placeholder="Select Day"
+                        style={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        dropDownContainerStyle={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        textStyle={[
+                            tw`text-violet-200`,
+                        ]}
+                        ArrowDownIconComponent={CustomArrowDown}
+                        ArrowUpIconComponent={CustomArrowUp}
                     />
                 </View>
 
@@ -137,6 +160,18 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setMonth}
                         setItems={setMonthItems}
+                        placeholder="Select Month"
+                        style={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        dropDownContainerStyle={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        textStyle={[
+                            tw`text-violet-200`,
+                        ]}
+                        ArrowDownIconComponent={CustomArrowDown}
+                        ArrowUpIconComponent={CustomArrowUp}
                     />
                 </View>
 
@@ -151,6 +186,18 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setYear}
                         setItems={setYearItems}
+                        placeholder="Select Year"
+                        style={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        dropDownContainerStyle={[
+                            tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                        ]}
+                        textStyle={[
+                            tw`text-violet-200`,
+                        ]}
+                        ArrowDownIconComponent={CustomArrowDown}
+                        ArrowUpIconComponent={CustomArrowUp}
                     />
                 </View>
             </View>
@@ -162,6 +209,7 @@ const ClimbForm = ({ navigation }) => {
             </View>
         </View>
     );
+
 };
 
 export default ClimbForm;

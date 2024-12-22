@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { getFirestore, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { Ionicons } from '@expo/vector-icons'; // Import for icons
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
 
 const db = getFirestore(app);
+
+const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />; // Violet-500
+const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />; // Violet-500
 
 const DeleteClimb = () => {
     const [climbs, setClimbs] = useState([]);
@@ -85,9 +89,8 @@ const DeleteClimb = () => {
 
     return (
         <View style={tw`flex-1 p-4`}>
-            <Text style={tw`text-violet-400 text-xl font-bold mb-2`}>Delete Climb</Text>
+            <Text style={tw`text-violet-600 text-xl font-bold mb-2`}>Delete Climb</Text>
 
-            <Text style={tw`text-violet-400 text-base font-bold mb-1`}>Search by Grade:</Text>
             <DropDownPicker
                 open={gradeOpen}
                 value={selectedGrade}
@@ -99,11 +102,21 @@ const DeleteClimb = () => {
                 setValue={setSelectedGrade}
                 setItems={setGradeItems}
                 placeholder="Select Grade"
+                style={[
+                    tw`mb-2 mt-2 rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                dropDownContainerStyle={[
+                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                textStyle={[
+                    tw`text-violet-200`,
+                ]}
+                ArrowDownIconComponent={CustomArrowDown}
+                ArrowUpIconComponent={CustomArrowUp}
                 zIndex={300}
                 zIndexInverse={100}
             />
 
-            <Text style={tw`text-violet-400 text-base mt-2 font-bold mb-1`}>Filter by Date:</Text>
             <DropDownPicker
                 open={dateOpen}
                 value={selectedDate}
@@ -115,7 +128,17 @@ const DeleteClimb = () => {
                 setValue={setSelectedDate}
                 setItems={setDateItems}
                 placeholder="Select Date"
-                style={tw`mb-4`}
+                style={[
+                    tw`mb-4 mt-2 rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                dropDownContainerStyle={[
+                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
+                ]}
+                textStyle={[
+                    tw`text-violet-200`,
+                ]}
+                ArrowDownIconComponent={CustomArrowDown}
+                ArrowUpIconComponent={CustomArrowUp}
                 zIndex={200}
                 zIndexInverse={100}
             />
@@ -125,7 +148,7 @@ const DeleteClimb = () => {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={tw`flex-row justify-between items-center mb-2`}>
-                        <Text style={tw`text-violet-400`}>
+                        <Text style={tw`text-violet-200`}>
                             {item.grade} - {new Date(item.date).toDateString()}
                         </Text>
                         <TouchableOpacity

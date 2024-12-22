@@ -7,8 +7,7 @@ import tw from '../tailwind';
 const ManageClimbs = ({ navigation }) => {
     return (
         <View style={tw`flex-1 bg-slate-900`}>
-            <Text style={tw`text-violet-600 text-2xl font-bold ml-4 mt-12`}>Manage Climbs</Text>
-            <View style={tw`flex-1`}>
+            <View style={tw`flex-1 mt-12`}>
                 <ClimbForm navigation={navigation} />
                 <DeleteClimb />
             </View>
