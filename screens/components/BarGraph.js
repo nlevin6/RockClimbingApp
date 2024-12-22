@@ -81,8 +81,8 @@ const BarGraph = () => {
     };
 
     return (
-        <View style={tw`flex-1`}>
-            <View style={tw`flex-row justify-center mb-2`}>
+        <View style={tw`bg-slate-900 p-4`}>
+            <View style={tw`flex-row justify-center mb-4`}>
                 {['Week', 'Month', 'Year'].map((view) => (
                     <TouchableOpacity
                         key={view}
@@ -96,27 +96,28 @@ const BarGraph = () => {
                 ))}
             </View>
 
-            <VictoryChart domainPadding={{ x: 20 }}>
-                <VictoryAxis
-                    style={{
-                        axis: { stroke: '#fff', strokeWidth: 2 },
-                        tickLabels: { fontSize: 14, fill: '#fff' },
-                    }}
-                />
-                <VictoryBar
-                    data={climbData}
-                    x="day"
-                    y="value"
-                    barWidth={30}
-                    cornerRadius={{ top: 5 }}
-                    style={{
-                        data: { fill: 'rgb(124, 58, 237)' },
-                    }}
-                    labels={({ datum }) => `${datum.value}`}
-                    labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white' }} />}
-                />
-            </VictoryChart>
-
+            <View style={tw`items-center`}>
+                <VictoryChart domainPadding={{ x: 30 }} padding={{ top: 20, bottom: 60, left: 20, right: 20 }}>
+                    <VictoryAxis
+                        style={{
+                            axis: { stroke: '#fff', strokeWidth: 2 },
+                            tickLabels: { fontSize: 12, fill: '#fff' },
+                        }}
+                    />
+                    <VictoryBar
+                        data={climbData}
+                        x="day"
+                        y="value"
+                        barWidth={15}
+                        cornerRadius={{ top: 5 }}
+                        style={{
+                            data: { fill: 'rgb(124, 58, 237)' },
+                        }}
+                        labels={({ datum }) => `${datum.value}`}
+                        labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
+                    />
+                </VictoryChart>
+            </View>
         </View>
     );
 };

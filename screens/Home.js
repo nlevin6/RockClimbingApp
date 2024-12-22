@@ -7,7 +7,7 @@ const Home = () => {
     return (
         <ScrollView style={tw`flex-1 bg-slate-900`}>
             <View style={tw`flex-1`}>
-                <View style={tw`mt-12 mb-8`}>
+                <View style={tw`mt-12 mb-8 justify-center text-center`}>
                     <BarGraph />
                 </View>
 
