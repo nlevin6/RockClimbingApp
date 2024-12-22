@@ -24,8 +24,14 @@ const BottomNav = () => {
                     }
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: 'purple',
+                tabBarActiveTintColor: 'rgb(124, 58, 237)',
                 tabBarInactiveTintColor: 'gray',
+                tabBarStyle: {
+                    backgroundColor: 'rgb(15, 23, 42)',
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderTopWidth: 0,
+                },
                 headerShown: false,
             })}
         >
