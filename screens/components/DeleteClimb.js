@@ -85,9 +85,9 @@ const DeleteClimb = () => {
 
     return (
         <View style={tw`flex-1 p-4`}>
-            <Text style={tw`text-white text-xl font-bold mb-4`}>Delete Climb</Text>
+            <Text style={tw`text-violet-400 text-xl font-bold mb-2`}>Delete Climb</Text>
 
-            <Text style={tw`text-white mb-1`}>Filter by Grade:</Text>
+            <Text style={tw`text-violet-400 text-base font-bold mb-1`}>Search by Grade:</Text>
             <DropDownPicker
                 open={gradeOpen}
                 value={selectedGrade}
@@ -99,12 +99,11 @@ const DeleteClimb = () => {
                 setValue={setSelectedGrade}
                 setItems={setGradeItems}
                 placeholder="Select Grade"
-                style={tw`mb-4`}
-                zIndex={3000}
-                zIndexInverse={1000}
+                zIndex={300}
+                zIndexInverse={100}
             />
 
-            <Text style={tw`text-white mb-1`}>Filter by Date:</Text>
+            <Text style={tw`text-violet-400 text-base mt-2 font-bold mb-1`}>Filter by Date:</Text>
             <DropDownPicker
                 open={dateOpen}
                 value={selectedDate}
@@ -117,8 +116,8 @@ const DeleteClimb = () => {
                 setItems={setDateItems}
                 placeholder="Select Date"
                 style={tw`mb-4`}
-                zIndex={2000}
-                zIndexInverse={1000}
+                zIndex={200}
+                zIndexInverse={100}
             />
 
             <FlatList
@@ -126,12 +125,12 @@ const DeleteClimb = () => {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={tw`flex-row justify-between items-center mb-2`}>
-                        <Text style={tw`text-white`}>
+                        <Text style={tw`text-violet-400`}>
                             {item.grade} - {new Date(item.date).toDateString()}
                         </Text>
                         <TouchableOpacity
                             onPress={() => handleDelete(item.id)}
-                            style={tw`bg-red-500 p-2 rounded`}
+                            style={tw`bg-red-500 p-2 rounded-2xl`}
                         >
                             <Text style={tw`text-white font-bold`}>Delete</Text>
                         </TouchableOpacity>

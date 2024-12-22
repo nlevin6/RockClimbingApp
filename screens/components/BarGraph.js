@@ -8,7 +8,7 @@ import app from '../../firebaseConfig';
 const db = getFirestore(app);
 
 const BarGraph = () => {
-    const [activeView, setActiveView] = useState('Day');
+    const [activeView, setActiveView] = useState('Week');
     const [climbData, setClimbData] = useState([]);
 
     useEffect(() => {
@@ -23,12 +23,17 @@ const BarGraph = () => {
         const today = new Date();
         let aggregatedData;
 
-        if (activeView === 'Day') {
-            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        if (activeView === 'Week') {
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            startOfWeek.setHours(0, 0, 0, 0);
+
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
 
-            const dayCounts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+            const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+
             data.forEach((climb) => {
                 const climbDate = new Date(climb.date);
                 if (climbDate >= startOfWeek && climbDate <= endOfWeek) {
@@ -37,7 +42,11 @@ const BarGraph = () => {
                     dayCounts[dayMapping[day]] += 1;
                 }
             });
-            aggregatedData = Object.keys(dayCounts).map((key) => ({ day: key, value: dayCounts[key] }));
+
+            aggregatedData = Object.keys(dayCounts).map((key) => ({
+                day: key,
+                value: dayCounts[key],
+            }));
         } else if (activeView === 'Month') {
             const currentYear = today.getFullYear();
             const monthCounts = Array(12).fill(0);
@@ -51,14 +60,21 @@ const BarGraph = () => {
             });
 
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            aggregatedData = monthCounts.map((value, index) => ({ day: monthNames[index], value }));
+            aggregatedData = monthCounts.map((value, index) => ({
+                day: monthNames[index],
+                value,
+            }));
         } else if (activeView === 'Year') {
             const yearCounts = {};
             data.forEach((climb) => {
                 const year = new Date(climb.date).getFullYear();
                 yearCounts[year] = (yearCounts[year] || 0) + 1;
             });
-            aggregatedData = Object.keys(yearCounts).map((key) => ({ day: key, value: yearCounts[key] }));
+
+            aggregatedData = Object.keys(yearCounts).map((key) => ({
+                day: key,
+                value: yearCounts[key],
+            }));
         }
 
         setClimbData(aggregatedData);
@@ -67,7 +83,7 @@ const BarGraph = () => {
     return (
         <View style={tw`flex-1`}>
             <View style={tw`flex-row justify-center mb-2`}>
-                {['Day', 'Month', 'Year'].map((view) => (
+                {['Week', 'Month', 'Year'].map((view) => (
                     <TouchableOpacity
                         key={view}
                         onPress={() => setActiveView(view)}
@@ -100,6 +116,7 @@ const BarGraph = () => {
                     labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white' }} />}
                 />
             </VictoryChart>
+
         </View>
     );
 };

@@ -13,41 +13,55 @@ const ClimbForm = ({ navigation }) => {
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
 
+
+
+
     const [grade, setGrade] = useState('V1');
     const [gradeOpen, setGradeOpen] = useState(false);
     const [gradeItems, setGradeItems] = useState(
         Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` }))
     );
 
-    const [day, setDay] = useState(currentDay);
+    const [day, setDay] = useState(currentDay.toString());
     const [dayOpen, setDayOpen] = useState(false);
     const [dayItems, setDayItems] = useState([]);
 
-    const [month, setMonth] = useState(currentMonth);
+    const [month, setMonth] = useState(currentMonth.toString());
     const [monthOpen, setMonthOpen] = useState(false);
-    const [monthItems, setMonthItems] = useState(
-        Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}`, value: i + 1 }))
-    );
+    const [monthItems, setMonthItems] = useState([
+        { label: 'Jan', value: '1' },
+        { label: 'Feb', value: '2' },
+        { label: 'Mar', value: '3' },
+        { label: 'Apr', value: '4' },
+        { label: 'May', value: '5' },
+        { label: 'Jun', value: '6' },
+        { label: 'Jul', value: '7' },
+        { label: 'Aug', value: '8' },
+        { label: 'Sep', value: '9' },
+        { label: 'Oct', value: '10' },
+        { label: 'Nov', value: '11' },
+        { label: 'Dec', value: '12' },
+    ]);
 
-    const [year, setYear] = useState(currentYear);
+    const [year, setYear] = useState(currentYear.toString());
     const [yearOpen, setYearOpen] = useState(false);
     const [yearItems, setYearItems] = useState(
-        Array.from({ length: 11 }, (_, i) => ({ label: `${currentYear - i}`, value: currentYear - i }))
+        Array.from({ length: 11 }, (_, i) => ({ label: `${currentYear - i}`, value: `${currentYear - i}` }))
     );
 
     const calculateDaysInMonth = (month, year) => {
         const daysInMonth = new Date(year, month, 0).getDate();
         return Array.from({ length: daysInMonth }, (_, i) => ({
             label: `${i + 1}`,
-            value: i + 1,
+            value: `${i + 1}`,
         }));
     };
 
     useEffect(() => {
         const days = calculateDaysInMonth(month, year);
         setDayItems(days);
-        if (day > days.length) {
-            setDay(days.length);
+        if (parseInt(day) > days.length) {
+            setDay(days.length.toString());
         }
     }, [month, year]);
 
@@ -80,8 +94,9 @@ const ClimbForm = ({ navigation }) => {
     };
 
     return (
-        <View style={tw`flex-1 bg-slate-900 p-4`}>
-            <Text style={tw`text-white mb-2 text-lg font-bold`}>Grade:</Text>
+        <View style={tw`p-4 bg-slate-900`}>
+            <Text style={tw`text-violet-400 mb-2 text-xl font-bold`}>Add Climb</Text>
+            <Text style={tw`text-violet-400 mb-1 text-base font-bold`}>Grade:</Text>
             <DropDownPicker
                 open={gradeOpen}
                 value={grade}
@@ -95,10 +110,9 @@ const ClimbForm = ({ navigation }) => {
                 zIndex={3000}
             />
 
-            <Text style={tw`text-white mb-2 text-lg font-bold`}>Date Completed:</Text>
+            <Text style={tw`text-violet-400 mt-2 mb-1 text-base font-bold`}>Date Completed:</Text>
             <View style={tw`flex-row justify-between`}>
-                <View style={tw`flex-1 mr-2`}>
-                    <Text style={tw`text-white mb-1`}>Day:</Text>
+                <View style={[tw`flex-1 mr-1`, { zIndex: 2000 }]}>
                     <DropDownPicker
                         open={dayOpen}
                         value={day}
@@ -109,12 +123,10 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setDay}
                         setItems={setDayItems}
-                        zIndex={2000}
                     />
                 </View>
 
-                <View style={tw`flex-1 mx-2`}>
-                    <Text style={tw`text-white mb-1`}>Month:</Text>
+                <View style={[tw`flex-1 mx-1`, { zIndex: 1500 }]}>
                     <DropDownPicker
                         open={monthOpen}
                         value={month}
@@ -125,12 +137,10 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setMonth}
                         setItems={setMonthItems}
-                        zIndex={1500}
                     />
                 </View>
 
-                <View style={tw`flex-1 ml-2`}>
-                    <Text style={tw`text-white mb-1`}>Year:</Text>
+                <View style={[tw`flex-1 ml-1`, { zIndex: 1000 }]}>
                     <DropDownPicker
                         open={yearOpen}
                         value={year}
@@ -141,17 +151,13 @@ const ClimbForm = ({ navigation }) => {
                         }}
                         setValue={setYear}
                         setItems={setYearItems}
-                        zIndex={1000}
                     />
                 </View>
             </View>
 
-            <View style={tw`flex-row justify-between mt-4`}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={tw`bg-red-500 p-3 rounded`}>
-                    <Text style={tw`text-white`}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSubmit} style={tw`bg-green-500 p-3 rounded`}>
-                    <Text style={tw`text-white`}>Add</Text>
+            <View style={tw`flex-row justify-between justify-center mt-2`}>
+                <TouchableOpacity onPress={handleSubmit} style={tw`bg-violet-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}>
+                    <Text style={tw`text-white font-bold text-center text-sm`}>Add</Text>
                 </TouchableOpacity>
             </View>
         </View>
