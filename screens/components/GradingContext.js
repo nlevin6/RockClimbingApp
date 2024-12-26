@@ -25,21 +25,18 @@ export const GradingProvider = ({ children }) => {
         fetchGradingSystem();
     }, []);
 
-    // Save the grading system to Firestore
-    const toggleGradingSystem = async () => {
-        const newSystem = gradingSystem === 'Hueco (USA)' ? 'Fontainebleau' : 'Hueco (USA)';
-        setGradingSystem(newSystem);
-
+    const updateGradingSystem = async (newSystem) => {
         try {
             const docRef = doc(db, 'settings', 'grading');
             await setDoc(docRef, { gradingSystem: newSystem });
+            setGradingSystem(newSystem);
         } catch (error) {
             console.error('Error saving grading system:', error);
         }
     };
 
     return (
-        <GradingContext.Provider value={{ gradingSystem, toggleGradingSystem }}>
+        <GradingContext.Provider value={{ gradingSystem, setGradingSystem: updateGradingSystem }}>
             {children}
         </GradingContext.Provider>
     );
