@@ -6,8 +6,8 @@ import GradingSystemSelect from './components/GradingSystemSelect';
 const Settings = () => {
     return (
         <View style={tw`flex-1 bg-slate-900`}>
-            <View style={tw`flex-1 mt-12`}>
-                <Text style={tw`text-violet-600 mb-2 ml-4 text-xl font-bold`}>Settings</Text>
+            <View style={tw`flex-1 mt-16`}>
+                <Text style={tw`text-violet-600 text-xl ml-4 font-bold mb-2`}>Settings</Text>
                 <GradingSystemSelect/>
             </View>
         </View>

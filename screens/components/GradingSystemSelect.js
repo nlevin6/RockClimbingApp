@@ -29,7 +29,7 @@ const GradingSystemSelect = () => {
     };
 
     return (
-        <View style={tw`flex-1 p-4 bg-slate-900`}>
+        <View style={tw`flex-1 pt-0 pb-4 px-4 bg-slate-900`}>
             <Text style={tw`text-violet-200 text-lg mb-2`}>Grading System</Text>
             <DropDownPicker
                 open={gradingOpen}
