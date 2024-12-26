@@ -6,22 +6,16 @@ import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
 import { useGradingSystem } from "./GradingContext";
+import gradingSystems from '../../screens/constants/gradingSystems';
 
 const db = getFirestore(app);
 
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
-const gradeOptions = {
-    'Hueco (USA)': Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` })),
-    Fontainebleau: [
-        '3', '4-', '4', '4+', '5', '5+', '6A', '6A+', '6B', '6B+', '6C', '6C+', '7A',
-        '7A+', '7B', '7B+', '7C', '7C+', '8A', '8A+', '8B', '8B+', '8C', '8C+', '9A'
-    ].map((grade) => ({ label: grade, value: grade })),
-};
-
 const DeleteClimb = () => {
     const { gradingSystem } = useGradingSystem();
+    const gradeItems = [{ label: 'Select', value: null }, ...gradingSystems[gradingSystem]];
 
 
 
@@ -36,10 +30,6 @@ const DeleteClimb = () => {
 
     const [gradingItems, setGradingItems] = useState([]);
     const [dateItems, setDateItems] = useState([]);
-    const gradeItems = [
-        { label: 'Select', value: null },
-        ...gradeOptions[gradingSystem],
-    ];
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {

@@ -6,21 +6,15 @@ import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
 import { useGradingSystem } from './GradingContext';
+import gradingSystems from '../constants/gradingSystems';
 
 const db = getFirestore(app);
 
-const gradeOptions = {
-    'Hueco (USA)': Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` })),
-    Fontainebleau: [
-        '3', '4-', '4', '4+', '5', '5+', '6A', '6A+', '6B', '6B+', '6C', '6C+', '7A',
-        '7A+', '7B', '7B+', '7C', '7C+', '8A', '8A+', '8B', '8B+', '8C', '8C+', '9A'
-    ].map((grade) => ({ label: grade, value: grade })),
-};
-
 const ClimbForm = ({ navigation }) => {
     const { gradingSystem } = useGradingSystem();
-    const [grade, setGrade] = useState(gradeOptions[gradingSystem][0].value);
-    const [gradeOpen, setGradeOpen] = useState(false);
+    const [grade, setGrade] = useState(gradingSystems[gradingSystem][0].value);
+    const [gradeOpen, setGradeOpen] = useState(false); // Declare gradeOpen state
+    const gradeItems = gradingSystems[gradingSystem];
 
     const today = new Date();
     const currentDay = today.getDate();
@@ -29,10 +23,6 @@ const ClimbForm = ({ navigation }) => {
 
     const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
     const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
-
-    // const [gradeItems, setGradeItems] = useState(
-    //     Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` }))
-    // );
 
     const [day, setDay] = useState(currentDay.toString());
     const [dayOpen, setDayOpen] = useState(false);
@@ -110,7 +100,7 @@ const ClimbForm = ({ navigation }) => {
             <DropDownPicker
                 open={gradeOpen}
                 value={grade}
-                items={gradeOptions[gradingSystem]}
+                items={gradeItems}
                 setOpen={setGradeOpen}
                 setValue={setGrade}
                 placeholder="Select Grade"
@@ -215,7 +205,6 @@ const ClimbForm = ({ navigation }) => {
             </View>
         </View>
     );
-
 };
 
 export default ClimbForm;
