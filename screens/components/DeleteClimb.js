@@ -2,16 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { getFirestore, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { Ionicons } from '@expo/vector-icons'; // Import for icons
+import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
+import { useGradingSystem } from "./GradingContext";
 
 const db = getFirestore(app);
 
-const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />; // Violet-500
-const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />; // Violet-500
+const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
+const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
+
+const gradeOptions = {
+    'Hueco (USA)': Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` })),
+    Fontainebleau: [
+        '3', '4-', '4', '4+', '5', '5+', '6A', '6A+', '6B', '6B+', '6C', '6C+', '7A',
+        '7A+', '7B', '7B+', '7C', '7C+', '8A', '8A+', '8B', '8B+', '8C', '8C+', '9A'
+    ].map((grade) => ({ label: grade, value: grade })),
+};
 
 const DeleteClimb = () => {
+    const { gradingSystem } = useGradingSystem();
+
+
+
     const [climbs, setClimbs] = useState([]);
     const [filteredClimbs, setFilteredClimbs] = useState([]);
 
@@ -21,8 +34,12 @@ const DeleteClimb = () => {
     const [gradeOpen, setGradeOpen] = useState(false);
     const [dateOpen, setDateOpen] = useState(false);
 
-    const [gradeItems, setGradeItems] = useState([]);
+    const [gradingItems, setGradingItems] = useState([]);
     const [dateItems, setDateItems] = useState([]);
+    const gradeItems = [
+        { label: 'Select', value: null },
+        ...gradeOptions[gradingSystem],
+    ];
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -39,7 +56,7 @@ const DeleteClimb = () => {
                     .sort((a, b) => parseInt(a.replace('V', ''), 10) - parseInt(b.replace('V', ''), 10))
                     .map((grade) => ({ label: grade, value: grade })),
             ];
-            setGradeItems(uniqueGrades);
+            setGradingItems(uniqueGrades);
 
             const uniqueDates = [
                 { label: 'Select', value: null },
@@ -100,7 +117,7 @@ const DeleteClimb = () => {
                     setGradeOpen(open);
                 }}
                 setValue={setSelectedGrade}
-                setItems={setGradeItems}
+                setItems={setGradingItems}
                 placeholder="Select Grade"
                 style={[
                     tw`mb-2 mt-2 rounded-2xl bg-slate-900 border border-slate-700`,

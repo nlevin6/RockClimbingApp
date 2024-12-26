@@ -5,10 +5,23 @@ import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import app from '../../firebaseConfig';
+import { useGradingSystem } from './GradingContext';
 
 const db = getFirestore(app);
 
+const gradeOptions = {
+    'Hueco (USA)': Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` })),
+    Fontainebleau: [
+        '3', '4-', '4', '4+', '5', '5+', '6A', '6A+', '6B', '6B+', '6C', '6C+', '7A',
+        '7A+', '7B', '7B+', '7C', '7C+', '8A', '8A+', '8B', '8B+', '8C', '8C+', '9A'
+    ].map((grade) => ({ label: grade, value: grade })),
+};
+
 const ClimbForm = ({ navigation }) => {
+    const { gradingSystem } = useGradingSystem();
+    const [grade, setGrade] = useState(gradeOptions[gradingSystem][0].value);
+    const [gradeOpen, setGradeOpen] = useState(false);
+
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.getMonth() + 1;
@@ -17,11 +30,9 @@ const ClimbForm = ({ navigation }) => {
     const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
     const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
-    const [grade, setGrade] = useState('V1');
-    const [gradeOpen, setGradeOpen] = useState(false);
-    const [gradeItems, setGradeItems] = useState(
-        Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` }))
-    );
+    // const [gradeItems, setGradeItems] = useState(
+    //     Array.from({ length: 17 }, (_, i) => ({ label: `V${i + 1}`, value: `V${i + 1}` }))
+    // );
 
     const [day, setDay] = useState(currentDay.toString());
     const [dayOpen, setDayOpen] = useState(false);
@@ -99,13 +110,9 @@ const ClimbForm = ({ navigation }) => {
             <DropDownPicker
                 open={gradeOpen}
                 value={grade}
-                items={gradeItems}
-                setOpen={(open) => {
-                    resetDropdowns('grade');
-                    setGradeOpen(open);
-                }}
+                items={gradeOptions[gradingSystem]}
+                setOpen={setGradeOpen}
                 setValue={setGrade}
-                setItems={setGradeItems}
                 placeholder="Select Grade"
                 style={[
                     tw`rounded-2xl bg-slate-900 border border-slate-700`,
