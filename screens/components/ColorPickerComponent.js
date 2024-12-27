@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
 import tw from '../../tailwind';
 
 const ColorPickerComponent = () => {
     const [color, setColor] = useState('#ffffff');
-    const [tempColor, setTempColor] = useState('#ffffff');
+    const [tempColor, setTempColor] = useState({ h: 0, s: 100, v: 100 });
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const toggleModal = () => {
@@ -14,15 +15,30 @@ const ColorPickerComponent = () => {
 
     const handleColorChange = (selectedColor) => {
         if (selectedColor) {
-            const hexColor = hsvToHex(selectedColor.h, selectedColor.s, selectedColor.v);
-            setTempColor(hexColor);
+            setTempColor((prev) => ({
+                ...prev,
+                h: selectedColor.h,
+            }));
         }
     };
 
+    const handleSaturationChange = (value) => {
+        setTempColor((prev) => ({
+            ...prev,
+            s: value,
+        }));
+    };
+
+    const handleBrightnessChange = (value) => {
+        setTempColor((prev) => ({
+            ...prev,
+            v: value,
+        }));
+    };
+
     const handleSelectColor = () => {
-        if (tempColor) {
-            setColor(tempColor);
-        }
+        const hexColor = hsvToHex(tempColor.h, tempColor.s, tempColor.v);
+        setColor(hexColor);
         toggleModal();
     };
 
@@ -33,30 +49,62 @@ const ColorPickerComponent = () => {
                 onPress={toggleModal}
             />
             <Modal visible={isModalVisible} transparent={true} animationType="slide">
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: tempColor }]}>
-                        <Text style={tw`text-black font-bold text-lg mb-4`}>Pick a Color</Text>
+                <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
+                    <View style={tw`w-4/5 bg-white p-4 rounded-lg items-center`}>
+                        <View
+                            style={[styles.colorDisplay, { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }]}
+                        >
+                        </View>
+                        <Text style={tw`text-black font-bold text-center`}>Saturation</Text>
+                        <Slider
+                            style={styles.slider}
+                            minimumValue={0}
+                            maximumValue={100}
+                            step={1}
+                            value={tempColor.s}
+                            onValueChange={handleSaturationChange}
+                            minimumTrackTintColor="#4CAF50"
+                            maximumTrackTintColor="#ddd"
+                        />
+                        <Text style={tw`text-black font-bold text-center mt-4`}>Brightness</Text>
+                        <Slider
+                            style={styles.slider}
+                            minimumValue={0}
+                            maximumValue={100}
+                            step={1}
+                            value={tempColor.v}
+                            onValueChange={handleBrightnessChange}
+                            minimumTrackTintColor="#FFC107"
+                            maximumTrackTintColor="#ddd"
+                        />
                         <View style={styles.colorWheelContainer}>
                             <Image
                                 source={require('../../assets/rgb_color_wheel.png')}
                                 style={styles.colorWheelImage}
                             />
                             <ColorWheel
-                                initialColor={color}
+                                initialColor={hsvToHex(tempColor.h, tempColor.s, tempColor.v)}
                                 onColorChange={handleColorChange}
                                 onColorChangeComplete={handleColorChange}
                                 style={styles.colorWheel}
-                                thumbStyle={styles.colorThumb}
+                                thumbStyle={{
+                                    width: 30,
+                                    height: 30,
+                                    borderRadius: 15,
+                                    backgroundColor: '#fff',
+                                    borderWidth: 2,
+                                    borderColor: '#000',
+                                }}
                             />
                         </View>
                         <TouchableOpacity
-                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#4CAF50' }]}
+                            style={tw`mt-4 p-2 rounded bg-green-500`}
                             onPress={handleSelectColor}
                         >
                             <Text style={tw`text-white font-bold text-center`}>Select Color</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#F44336' }]}
+                            style={tw`mt-4 p-2 rounded bg-red-500`}
                             onPress={toggleModal}
                         >
                             <Text style={tw`text-white font-bold text-center`}>Cancel</Text>
@@ -120,23 +168,24 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
     },
-    modalOverlay: {
-        flex: 1,
+    colorDisplay: {
+        width: '100%',
+        height: 100,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    modalContent: {
-        padding: 16,
         borderRadius: 16,
-        alignItems: 'center',
+        marginBottom: 16,
+    },
+    slider: {
         width: '80%',
+        height: 40,
     },
     colorWheelContainer: {
         width: 300,
         height: 300,
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 16,
     },
     colorWheelImage: {
         position: 'absolute',
@@ -147,14 +196,6 @@ const styles = StyleSheet.create({
     colorWheel: {
         width: '100%',
         height: '100%',
-    },
-    colorThumb: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: '#fff',
-        borderWidth: 2,
-        borderColor: '#000',
     },
 });
 

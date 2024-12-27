@@ -2490,6 +2490,11 @@
   dependencies:
     invariant "^2.2.4"
 
+"@react-native-community/slider@^4.5.5":
+  version "4.5.5"
+  resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-4.5.5.tgz"
+  integrity sha512-x2N415pg4ZxIltArOKczPwn7JEYh+1OxQ4+hTnafomnMsqs65HZuEWcX+Ch8c5r8V83DiunuQUf5hWGWlw8hQQ==
+
 "@react-native-firebase/app@21.6.1":
   version "21.6.1"
   resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-21.6.1.tgz"
