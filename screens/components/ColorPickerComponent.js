@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from 'react-native';
 import { ColorWheel } from 'react-native-color-wheel';
 import tw from '../../tailwind';
 
 const ColorPickerComponent = () => {
-    const [color, setColor] = useState('#ffffff'); // Main color
-    const [tempColor, setTempColor] = useState({ h: 0, s: 100, v: 100 }); // Temporary HSV color
+    const [color, setColor] = useState('#ffffff');
+    const [tempColor, setTempColor] = useState('#ffffff');
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const toggleModal = () => {
@@ -14,76 +14,49 @@ const ColorPickerComponent = () => {
 
     const handleColorChange = (selectedColor) => {
         if (selectedColor) {
-            setTempColor((prev) => ({ ...prev, ...selectedColor }));
+            const hexColor = hsvToHex(selectedColor.h, selectedColor.s, selectedColor.v);
+            setTempColor(hexColor);
         }
     };
 
     const handleSelectColor = () => {
         if (tempColor) {
-            const hexColor = hsvToHex(tempColor.h, tempColor.s, tempColor.v);
-            setColor(hexColor); // Update the main color
+            setColor(tempColor);
         }
-        toggleModal(); // Close the modal
-    };
-
-    const handleSaturationChange = (value) => {
-        setTempColor((prev) => ({ ...prev, s: value }));
-    };
-
-    const handleBrightnessChange = (value) => {
-        setTempColor((prev) => ({ ...prev, v: value }));
+        toggleModal();
     };
 
     return (
         <View style={tw`flex-1 p-4 bg-slate-900`}>
             <TouchableOpacity
-                style={[styles.colorBox, { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }]}
+                style={[styles.colorBox, { backgroundColor: color }]}
                 onPress={toggleModal}
             />
             <Modal visible={isModalVisible} transparent={true} animationType="slide">
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent]}>
+                    <View style={[styles.modalContent, { backgroundColor: tempColor }]}>
                         <Text style={tw`text-black font-bold text-lg mb-4`}>Pick a Color</Text>
                         <View style={styles.colorWheelContainer}>
-                            {/* Central RGB Color Wheel */}
                             <Image
-                                source={require('../../assets/rgb_color_wheel.png')} // Replace with your RGB wheel image path
+                                source={require('../../assets/rgb_color_wheel.png')}
                                 style={styles.colorWheelImage}
                             />
                             <ColorWheel
-                                initialColor={hsvToHex(tempColor.h, tempColor.s, tempColor.v)}
+                                initialColor={color}
                                 onColorChange={handleColorChange}
                                 onColorChangeComplete={handleColorChange}
                                 style={styles.colorWheel}
                                 thumbStyle={styles.colorThumb}
                             />
                         </View>
-                        <Text style={tw`text-black font-bold text-center`}>Saturation</Text>
-                        <Slider
-                            style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={100}
-                            step={1}
-                            value={tempColor.s}
-                            onValueChange={handleSaturationChange}
-                        />
-                        <Text style={tw`text-black font-bold text-center`}>Brightness</Text>
-                        <Slider
-                            style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={100}
-                            step={1}
-                            value={tempColor.v}
-                            onValueChange={handleBrightnessChange}
-                        />
                         <TouchableOpacity
-                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#4CAF50' }]} // Green
+                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#4CAF50' }]}
                             onPress={handleSelectColor}
                         >
                             <Text style={tw`text-white font-bold text-center`}>Select Color</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#F44336' }]} // Red
+                            style={[tw`mt-4 p-2 rounded`, { backgroundColor: '#F44336' }]}
                             onPress={toggleModal}
                         >
                             <Text style={tw`text-white font-bold text-center`}>Cancel</Text>
@@ -95,7 +68,6 @@ const ColorPickerComponent = () => {
     );
 };
 
-// Helper function to convert HSV to Hex
 const hsvToHex = (h, s, v) => {
     h = h % 360;
     if (h < 0) h += 360;
@@ -159,7 +131,6 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         width: '80%',
-        backgroundColor: 'white',
     },
     colorWheelContainer: {
         width: 300,
@@ -184,10 +155,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderWidth: 2,
         borderColor: '#000',
-    },
-    slider: {
-        width: '80%',
-        height: 40,
     },
 });
 
