@@ -65,6 +65,7 @@ const ColorPickerComponent = () => {
                             onValueChange={handleSaturationChange}
                             minimumTrackTintColor="rgb(167 139 250)"
                             maximumTrackTintColor="#ddd"
+                            thumbTintColor="rgb(109, 40, 217)"
                         />
                         <Text style={tw`text-violet-200 font-bold text-center mt-4`}>Brightness</Text>
                         <Slider
@@ -76,6 +77,7 @@ const ColorPickerComponent = () => {
                             onValueChange={handleBrightnessChange}
                             minimumTrackTintColor="rgb(167 139 250)"
                             maximumTrackTintColor="#ddd"
+                            thumbTintColor="rgb(109, 40, 217)"
                         />
                         <View style={styles.colorWheelContainer}>
                             <Image
