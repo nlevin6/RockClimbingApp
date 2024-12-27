@@ -50,12 +50,12 @@ const ColorPickerComponent = () => {
             />
             <Modal visible={isModalVisible} transparent={true} animationType="slide">
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
-                    <View style={tw`w-4/5 bg-white p-4 rounded-lg items-center`}>
+                    <View style={tw`w-4/5 bg-slate-900 border border-violet-700 p-4 rounded-lg items-center`}>
                         <View
                             style={[styles.colorDisplay, { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }]}
                         >
                         </View>
-                        <Text style={tw`text-black font-bold text-center`}>Saturation</Text>
+                        <Text style={tw`text-violet-200 font-bold text-center`}>Saturation</Text>
                         <Slider
                             style={styles.slider}
                             minimumValue={0}
@@ -63,10 +63,10 @@ const ColorPickerComponent = () => {
                             step={1}
                             value={tempColor.s}
                             onValueChange={handleSaturationChange}
-                            minimumTrackTintColor="#4CAF50"
+                            minimumTrackTintColor="rgb(167 139 250)"
                             maximumTrackTintColor="#ddd"
                         />
-                        <Text style={tw`text-black font-bold text-center mt-4`}>Brightness</Text>
+                        <Text style={tw`text-violet-200 font-bold text-center mt-4`}>Brightness</Text>
                         <Slider
                             style={styles.slider}
                             minimumValue={0}
@@ -74,7 +74,7 @@ const ColorPickerComponent = () => {
                             step={1}
                             value={tempColor.v}
                             onValueChange={handleBrightnessChange}
-                            minimumTrackTintColor="#FFC107"
+                            minimumTrackTintColor="rgb(167 139 250)"
                             maximumTrackTintColor="#ddd"
                         />
                         <View style={styles.colorWheelContainer}>
@@ -98,16 +98,16 @@ const ColorPickerComponent = () => {
                             />
                         </View>
                         <TouchableOpacity
-                            style={tw`mt-4 p-2 rounded bg-green-500`}
+                            style={tw`mt-4 bg-violet-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
                             onPress={handleSelectColor}
                         >
-                            <Text style={tw`text-white font-bold text-center`}>Select Color</Text>
+                            <Text style={tw`text-white font-bold text-center text-sm`}>Select Color</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={tw`mt-4 p-2 rounded bg-red-500`}
+                            style={tw`mt-4 bg-red-500 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
                             onPress={toggleModal}
                         >
-                            <Text style={tw`text-white font-bold text-center`}>Cancel</Text>
+                            <Text style={tw`text-white font-bold text-center text-sm`}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#000',
         marginBottom: 16,
     },
     slider: {
