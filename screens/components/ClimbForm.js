@@ -12,9 +12,9 @@ const db = getFirestore(app);
 
 const ClimbForm = ({ navigation }) => {
     const { gradingSystem } = useGradingSystem();
-    const [grade, setGrade] = useState(gradingSystems[gradingSystem][0].value);
-    const [gradeOpen, setGradeOpen] = useState(false); // Declare gradeOpen state
-    const gradeItems = gradingSystems[gradingSystem];
+    const gradeItems = gradingSystems[gradingSystem] || [];
+    const [grade, setGrade] = useState(gradeItems[0]?.value || null);
+    const [gradeOpen, setGradeOpen] = useState(false);
 
     const today = new Date();
     const currentDay = today.getDate();

@@ -15,7 +15,11 @@ const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6
 
 const DeleteClimb = () => {
     const { gradingSystem } = useGradingSystem();
-    const gradeItems = [{ label: 'Select', value: null }, ...gradingSystems[gradingSystem]];
+    const gradeItems = [
+        { label: 'Select', value: null },
+        ...(gradingSystems[gradingSystem] || []),
+    ];
+
 
 
 
