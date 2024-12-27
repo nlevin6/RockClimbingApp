@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
+import DraggableFlatList from 'react-native-draggable-flatlist';
 import tw from '../../tailwind';
 
 const ColorPickerComponent = () => {
     const [color, setColor] = useState('#ffffff');
     const [tempColor, setTempColor] = useState({ h: 0, s: 100, v: 100 });
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [colorBar, setColorBar] = useState([]);
+    const [selectedColorIndex, setSelectedColorIndex] = useState(null);
 
     const toggleModal = () => {
         setIsModalVisible(!isModalVisible);
@@ -42,19 +45,86 @@ const ColorPickerComponent = () => {
         toggleModal();
     };
 
+    const addColorToBar = () => {
+        if (colorBar.length < 13) {
+            const uniqueKey = `${Date.now()}-${Math.random()}`;
+            setColorBar((prev) => [...prev, { key: uniqueKey, color }]);
+        }
+    };
+
+    const handleColorPress = (index) => {
+        setSelectedColorIndex(index);
+    };
+
+    const deleteSelectedColor = () => {
+        if (selectedColorIndex !== null) {
+            const updatedColorBar = colorBar.filter((_, index) => index !== selectedColorIndex);
+            setColorBar(updatedColorBar);
+            setSelectedColorIndex(null);
+        }
+    };
+
+    const handleBackgroundPress = () => {
+        setSelectedColorIndex(null);
+    };
+
+    const calculateBlockSize = () => {
+        const maxWidth = 320;
+        const blockCount = colorBar.length;
+        const blockSize = blockCount > 0 ? Math.min(40, Math.floor(maxWidth / blockCount) - 4) : 40;
+        return Math.max(20, blockSize);
+    };
+
+    const blockSize = calculateBlockSize();
+
     return (
-        <View style={tw`flex-1 p-4 bg-slate-900`}>
+        <Pressable style={tw`flex-1 p-4 bg-slate-900`} onPress={handleBackgroundPress}>
+            <DraggableFlatList
+                data={colorBar}
+                renderItem={({ item, drag, isActive }) => (
+                    <TouchableOpacity
+                        onLongPress={drag}
+                        onPress={() => handleColorPress(colorBar.indexOf(item))}
+                        disabled={isActive}
+                        style={[
+                            styles.colorBlock,
+                            { backgroundColor: item.color, width: blockSize, height: blockSize }
+                        ]}
+                    />
+                )}
+                keyExtractor={(item) => item.key}
+                onDragEnd={({ data }) => setColorBar(data)}
+                horizontal
+                scrollEnabled={false}
+                contentContainerStyle={styles.colorBarContainer}
+            />
+            {selectedColorIndex !== null && (
+                <TouchableOpacity
+                    style={tw`mt-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                    onPress={deleteSelectedColor}
+                >
+                    <Text style={tw`text-white font-bold text-center text-sm`}>Delete Grade</Text>
+                </TouchableOpacity>
+            )}
             <TouchableOpacity
                 style={[styles.colorBox, { backgroundColor: color }]}
                 onPress={toggleModal}
             />
+            <TouchableOpacity
+                style={tw`mt-4 bg-green-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                onPress={addColorToBar}
+            >
+                <Text style={tw`text-white font-bold text-center text-sm`}>Add Grade</Text>
+            </TouchableOpacity>
             <Modal visible={isModalVisible} transparent={true} animationType="slide">
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
                     <View style={tw`w-4/5 bg-slate-900 border border-violet-700 p-4 rounded-lg items-center`}>
                         <View
-                            style={[styles.colorDisplay, { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }]}
-                        >
-                        </View>
+                            style={[
+                                styles.colorDisplay,
+                                { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }
+                            ]}
+                        ></View>
                         <Text style={tw`text-violet-200 font-bold text-center`}>Saturation</Text>
                         <Slider
                             style={styles.slider}
@@ -114,7 +184,7 @@ const ColorPickerComponent = () => {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </Pressable>
     );
 };
 
@@ -200,6 +270,17 @@ const styles = StyleSheet.create({
     colorWheel: {
         width: '100%',
         height: '100%',
+    },
+    colorBarContainer: {
+        flexDirection: 'row',
+        marginVertical: 16,
+        flexWrap: 'nowrap',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    colorBlock: {
+        marginHorizontal: 4,
+        borderRadius: 8,
     },
 });
 
