@@ -185,7 +185,7 @@ const ColorPickerComponent = () => {
                             <Text style={tw`text-white font-bold text-center text-sm`}>Select Color</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={tw`mt-4 bg-red-500 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                            style={tw`mt-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
                             onPress={toggleModal}
                         >
                             <Text style={tw`text-white font-bold text-center text-sm`}>Cancel</Text>
