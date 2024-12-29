@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -47,10 +47,13 @@ const ColorPickerComponent = () => {
     };
 
     const addColorToBar = () => {
+        if (chromaticGrades.some((item) => item.color.toLowerCase() === color.toLowerCase())) {
+            Alert.alert('Error', 'This color already exists');
+            return;
+        }
         if (chromaticGrades.length < 13) {
             const uniqueKey = `${Date.now()}-${Math.random()}`;
-            const newGrades = [...chromaticGrades, { key: uniqueKey, color }];
-            setChromaticGrades(newGrades);
+            setChromaticGrades([...chromaticGrades, { key: uniqueKey, color }]);
         }
     };
 
@@ -197,15 +200,12 @@ const ColorPickerComponent = () => {
 const hsvToHex = (h, s, v) => {
     h = h % 360;
     if (h < 0) h += 360;
-
     s = s / 100;
     v = v / 100;
-
     let c = v * s;
     let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     let m = v - c;
     let r1, g1, b1;
-
     if (h >= 0 && h < 60) {
         r1 = c;
         g1 = x;
@@ -231,11 +231,9 @@ const hsvToHex = (h, s, v) => {
         g1 = 0;
         b1 = x;
     }
-
     const r = Math.round((r1 + m) * 255);
     const g = Math.round((g1 + m) * 255);
     const b = Math.round((b1 + m) * 255);
-
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 };
 
