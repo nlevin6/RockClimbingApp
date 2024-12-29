@@ -109,7 +109,7 @@ const ColorPickerComponent = () => {
             />
             {selectedColorIndex !== null && (
                 <TouchableOpacity
-                    style={tw`mt-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                    style={tw`mt-2 mb-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl`}
                     onPress={deleteSelectedColor}
                 >
                     <Text style={tw`text-white font-bold text-center text-sm`}>Delete Grade</Text>
@@ -120,7 +120,7 @@ const ColorPickerComponent = () => {
                 onPress={toggleModal}
             />
             <TouchableOpacity
-                style={tw`mt-4 bg-green-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                style={tw`mt-4 bg-violet-700 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl`}
                 onPress={addColorToBar}
             >
                 <Text style={tw`text-white font-bold text-center text-sm`}>Add Grade</Text>
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     colorBox: {
         padding: 16,
         borderRadius: 16,
-        width: 100,
+        width: '100%',
         height: 100,
     },
     colorDisplay: {
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     },
     colorBarContainer: {
         flexDirection: 'row',
-        marginVertical: 16,
+        marginVertical: 10,
         flexWrap: 'nowrap',
         alignItems: 'center',
         justifyContent: 'center',

@@ -201,7 +201,7 @@ const DeleteClimb = () => {
 
                         <TouchableOpacity
                             onPress={() => handleDelete(item.id)}
-                            style={tw`bg-red-500 p-2 rounded-2xl`}
+                            style={tw`bg-red-600 p-2 rounded-2xl`}
                         >
                             <Text style={tw`text-white font-bold`}>Delete</Text>
                         </TouchableOpacity>
