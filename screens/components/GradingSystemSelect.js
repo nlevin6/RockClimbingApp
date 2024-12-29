@@ -14,47 +14,26 @@ const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6
 
 const GradingSystemSelect = () => {
     const { gradingSystem, setGradingSystem } = useGradingSystem();
-
     const [gradingOpen, setGradingOpen] = useState(false);
     const [localValue, setLocalValue] = useState(gradingSystem);
+
+    // Include "Chromatic"
     const [gradingItems, setGradingItems] = useState([
         { label: 'Hueco (USA)', value: 'Hueco (USA)' },
         { label: 'Fontainebleau', value: 'Fontainebleau' },
         { label: 'Yosemite Decimal System', value: 'Yosemite Decimal System' },
+        { label: 'Chromatic', value: 'Chromatic' }, // <-- Added
     ]);
 
+    // Make sure localValue updates if gradingSystem changes in context
     useEffect(() => {
-        const fetchGradingSystem = async () => {
-            try {
-                const docRef = doc(db, 'settings', 'gradingSystem');
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const savedGradingSystem = docSnap.data().gradingSystem;
-                    setGradingSystem(savedGradingSystem);
-                    setLocalValue(savedGradingSystem);
-                } else {
-                    console.log("No grading system found in the database.");
-                }
-            } catch (error) {
-                console.error("Error fetching grading system:", error);
-                Alert.alert("Error", "Failed to fetch grading system from the database.");
-            }
-        };
-
-        fetchGradingSystem();
-    }, []);
+        setLocalValue(gradingSystem);
+    }, [gradingSystem]);
 
     const handleChangeValue = async (value) => {
-        try {
-            const docRef = doc(db, 'settings', 'gradingSystem');
-            await setDoc(docRef, { gradingSystem: value });
-            setGradingSystem(value);
-            setLocalValue(value);
-        } catch (error) {
-            console.error("Error saving grading system:", error);
-            Alert.alert("Error", "Failed to save grading system to the database.");
-        }
+        // Save to Firestore and context
+        setGradingSystem(value);
+        setLocalValue(value);
     };
 
     return (

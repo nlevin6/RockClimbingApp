@@ -4,12 +4,13 @@ import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import tw from '../../tailwind';
+import { useGradingSystem } from './GradingContext';
 
 const ColorPickerComponent = () => {
+    const { chromaticGrades, setChromaticGrades } = useGradingSystem();
     const [color, setColor] = useState('#ffffff');
     const [tempColor, setTempColor] = useState({ h: 0, s: 100, v: 100 });
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [colorBar, setColorBar] = useState([]);
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
 
     const toggleModal = () => {
@@ -46,9 +47,10 @@ const ColorPickerComponent = () => {
     };
 
     const addColorToBar = () => {
-        if (colorBar.length < 13) {
+        if (chromaticGrades.length < 13) {
             const uniqueKey = `${Date.now()}-${Math.random()}`;
-            setColorBar((prev) => [...prev, { key: uniqueKey, color }]);
+            const newGrades = [...chromaticGrades, { key: uniqueKey, color }];
+            setChromaticGrades(newGrades);
         }
     };
 
@@ -58,8 +60,8 @@ const ColorPickerComponent = () => {
 
     const deleteSelectedColor = () => {
         if (selectedColorIndex !== null) {
-            const updatedColorBar = colorBar.filter((_, index) => index !== selectedColorIndex);
-            setColorBar(updatedColorBar);
+            const updatedColorBar = chromaticGrades.filter((_, index) => index !== selectedColorIndex);
+            setChromaticGrades(updatedColorBar);
             setSelectedColorIndex(null);
         }
     };
@@ -70,9 +72,13 @@ const ColorPickerComponent = () => {
 
     const calculateBlockSize = () => {
         const maxWidth = 320;
-        const blockCount = colorBar.length;
+        const blockCount = chromaticGrades.length;
         const blockSize = blockCount > 0 ? Math.min(40, Math.floor(maxWidth / blockCount) - 4) : 40;
         return Math.max(20, blockSize);
+    };
+
+    const onDragEnd = ({ data }) => {
+        setChromaticGrades(data);
     };
 
     const blockSize = calculateBlockSize();
@@ -80,11 +86,11 @@ const ColorPickerComponent = () => {
     return (
         <Pressable style={tw`flex-1 p-4 bg-slate-900`} onPress={handleBackgroundPress}>
             <DraggableFlatList
-                data={colorBar}
+                data={chromaticGrades}
                 renderItem={({ item, drag, isActive }) => (
                     <TouchableOpacity
                         onLongPress={drag}
-                        onPress={() => handleColorPress(colorBar.indexOf(item))}
+                        onPress={() => handleColorPress(chromaticGrades.indexOf(item))}
                         disabled={isActive}
                         style={[
                             styles.colorBlock,
@@ -93,7 +99,7 @@ const ColorPickerComponent = () => {
                     />
                 )}
                 keyExtractor={(item) => item.key}
-                onDragEnd={({ data }) => setColorBar(data)}
+                onDragEnd={onDragEnd}
                 horizontal
                 scrollEnabled={false}
                 contentContainerStyle={styles.colorBarContainer}
@@ -124,7 +130,7 @@ const ColorPickerComponent = () => {
                                 styles.colorDisplay,
                                 { backgroundColor: hsvToHex(tempColor.h, tempColor.s, tempColor.v) }
                             ]}
-                        ></View>
+                        />
                         <Text style={tw`text-violet-200 font-bold text-center`}>Saturation</Text>
                         <Slider
                             style={styles.slider}

@@ -8,35 +8,66 @@ const db = getFirestore(app);
 
 export const GradingProvider = ({ children }) => {
     const [gradingSystem, setGradingSystem] = useState('Hueco (USA)');
+    const [chromaticGrades, setChromaticGrades] = useState([]);
 
     useEffect(() => {
-        const fetchGradingSystem = async () => {
+        const fetchGradingSettings = async () => {
             try {
                 const docRef = doc(db, 'settings', 'grading');
                 const docSnap = await getDoc(docRef);
+
                 if (docSnap.exists()) {
-                    setGradingSystem(docSnap.data().gradingSystem);
+                    const data = docSnap.data();
+                    if (data.gradingSystem) {
+                        setGradingSystem(data.gradingSystem);
+                    }
+                    if (data.chromaticGrades) {
+                        setChromaticGrades(data.chromaticGrades);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching grading system:', error);
             }
         };
 
-        fetchGradingSystem();
+        fetchGradingSettings();
     }, []);
 
     const updateGradingSystem = async (newSystem) => {
         try {
             const docRef = doc(db, 'settings', 'grading');
-            await setDoc(docRef, { gradingSystem: newSystem });
+            await setDoc(docRef, {
+                gradingSystem: newSystem,
+                chromaticGrades
+            }, { merge: true });
             setGradingSystem(newSystem);
         } catch (error) {
             console.error('Error saving grading system:', error);
         }
     };
 
+    const updateChromaticGrades = async (newChromaticGrades) => {
+        try {
+            const docRef = doc(db, 'settings', 'grading');
+            await setDoc(docRef, {
+                gradingSystem,
+                chromaticGrades: newChromaticGrades
+            }, { merge: true });
+            setChromaticGrades(newChromaticGrades);
+        } catch (error) {
+            console.error('Error saving chromatic grades:', error);
+        }
+    };
+
     return (
-        <GradingContext.Provider value={{ gradingSystem, setGradingSystem: updateGradingSystem }}>
+        <GradingContext.Provider
+            value={{
+                gradingSystem,
+                setGradingSystem: updateGradingSystem,
+                chromaticGrades,
+                setChromaticGrades: updateChromaticGrades
+            }}
+        >
             {children}
         </GradingContext.Provider>
     );

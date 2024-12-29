@@ -14,14 +14,19 @@ const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
 const DeleteClimb = () => {
-    const { gradingSystem } = useGradingSystem();
-    const gradeItems = [
-        { label: 'Select', value: null },
-        ...(gradingSystems[gradingSystem] || []),
-    ];
+    const { gradingSystem, chromaticGrades } = useGradingSystem();
 
+    let baseGradeItems = [];
+    if (gradingSystem === 'Chromatic') {
+        baseGradeItems = chromaticGrades.map((item, index) => ({
+            label: `Color ${index + 1}: ${item.color}`,
+            value: item.color
+        }));
+    } else {
+        baseGradeItems = gradingSystems[gradingSystem] || [];
+    }
 
-
+    const gradeItems = [{ label: 'Select', value: null }, ...baseGradeItems];
 
     const [climbs, setClimbs] = useState([]);
     const [filteredClimbs, setFilteredClimbs] = useState([]);
@@ -32,8 +37,8 @@ const DeleteClimb = () => {
     const [gradeOpen, setGradeOpen] = useState(false);
     const [dateOpen, setDateOpen] = useState(false);
 
-    const [gradingItems, setGradingItems] = useState([]);
-    const [dateItems, setDateItems] = useState([]);
+    const [gradingItems, setGradingItems] = useState(gradeItems);
+    const [dateItems, setDateItems] = useState([{ label: 'Select', value: null }]);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -41,16 +46,7 @@ const DeleteClimb = () => {
                 id: doc.id,
                 ...doc.data(),
             }));
-
             setClimbs(climbsData);
-
-            const uniqueGrades = [
-                { label: 'Select', value: null },
-                ...Array.from(new Set(climbsData.map((climb) => climb.grade)))
-                    .sort((a, b) => parseInt(a.replace('V', ''), 10) - parseInt(b.replace('V', ''), 10))
-                    .map((grade) => ({ label: grade, value: grade })),
-            ];
-            setGradingItems(uniqueGrades);
 
             const uniqueDates = [
                 { label: 'Select', value: null },
@@ -65,6 +61,20 @@ const DeleteClimb = () => {
 
         return () => unsubscribe();
     }, [selectedGrade, selectedDate]);
+
+    useEffect(() => {
+        let newBaseItems = [];
+        if (gradingSystem === 'Chromatic') {
+            newBaseItems = chromaticGrades.map((item, index) => ({
+                label: `Color ${index + 1}: ${item.color}`,
+                value: item.color
+            }));
+        } else {
+            newBaseItems = gradingSystems[gradingSystem] || [];
+        }
+        const newGradeItems = [{ label: 'Select', value: null }, ...newBaseItems];
+        setGradingItems(newGradeItems);
+    }, [gradingSystem, chromaticGrades]);
 
     const filterClimbs = (climbsData, gradeFilter, dateFilter) => {
         let filtered = climbsData;
@@ -99,13 +109,13 @@ const DeleteClimb = () => {
     };
 
     return (
-        <View style={tw`flex-1 p-4`}>
+        <View style={tw`flex-1 p-4 bg-slate-900`}>
             <Text style={tw`text-violet-600 text-xl font-bold mb-2`}>Delete Climb</Text>
 
             <DropDownPicker
                 open={gradeOpen}
                 value={selectedGrade}
-                items={gradeItems}
+                items={gradingItems}
                 setOpen={(open) => {
                     resetDropdowns('grade');
                     setGradeOpen(open);
@@ -113,15 +123,9 @@ const DeleteClimb = () => {
                 setValue={setSelectedGrade}
                 setItems={setGradingItems}
                 placeholder="Select Grade"
-                style={[
-                    tw`mb-2 mt-2 rounded-2xl bg-slate-900 border border-slate-700`,
-                ]}
-                dropDownContainerStyle={[
-                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
-                ]}
-                textStyle={[
-                    tw`text-violet-200`,
-                ]}
+                style={tw`mb-2 mt-2 rounded-2xl bg-slate-900 border border-slate-700`}
+                dropDownContainerStyle={tw`rounded-2xl bg-slate-900 border border-slate-700`}
+                textStyle={tw`text-violet-200`}
                 ArrowDownIconComponent={CustomArrowDown}
                 ArrowUpIconComponent={CustomArrowUp}
                 zIndex={300}
@@ -139,15 +143,9 @@ const DeleteClimb = () => {
                 setValue={setSelectedDate}
                 setItems={setDateItems}
                 placeholder="Select Date"
-                style={[
-                    tw`mb-4 mt-2 rounded-2xl bg-slate-900 border border-slate-700`,
-                ]}
-                dropDownContainerStyle={[
-                    tw`rounded-2xl bg-slate-900 border border-slate-700`,
-                ]}
-                textStyle={[
-                    tw`text-violet-200`,
-                ]}
+                style={tw`mb-4 mt-2 rounded-2xl bg-slate-900 border border-slate-700`}
+                dropDownContainerStyle={tw`rounded-2xl bg-slate-900 border border-slate-700`}
+                textStyle={tw`text-violet-200`}
                 ArrowDownIconComponent={CustomArrowDown}
                 ArrowUpIconComponent={CustomArrowUp}
                 zIndex={200}
