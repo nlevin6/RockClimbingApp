@@ -15,11 +15,23 @@ const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6
 
 const ClimbForm = ({ navigation }) => {
     const { gradingSystem, chromaticGrades } = useGradingSystem();
+
     let gradeItems = [];
     if (gradingSystem === 'Chromatic') {
-        gradeItems = chromaticGrades.map((item, index) => ({
-            label: `Color ${index + 1}: ${item.color}`,
+        gradeItems = chromaticGrades.map((item) => ({
+            label: '',
             value: item.color,
+            icon: () => (
+                <View
+                    style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: item.color,
+                        borderRadius: 4,
+                        marginRight: 8,
+                    }}
+                />
+            ),
         }));
     } else {
         gradeItems = gradingSystems[gradingSystem] || [];

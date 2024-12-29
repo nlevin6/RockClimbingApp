@@ -13,32 +13,22 @@ const db = getFirestore(app);
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
+const isHexColor = (str) => /^#([0-9A-F]{3}){1,2}$/i.test(str);
+
 const DeleteClimb = () => {
     const { gradingSystem, chromaticGrades } = useGradingSystem();
 
-    let baseGradeItems = [];
-    if (gradingSystem === 'Chromatic') {
-        baseGradeItems = chromaticGrades.map((item, index) => ({
-            label: `Color ${index + 1}: ${item.color}`,
-            value: item.color
-        }));
-    } else {
-        baseGradeItems = gradingSystems[gradingSystem] || [];
-    }
-
-    const gradeItems = [{ label: 'Select', value: null }, ...baseGradeItems];
-
-    const [climbs, setClimbs] = useState([]);
-    const [filteredClimbs, setFilteredClimbs] = useState([]);
-
+    const [gradingItems, setGradingItems] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState(null);
+
+    const [dateItems, setDateItems] = useState([{ label: 'Select', value: null }]);
     const [selectedDate, setSelectedDate] = useState(null);
 
     const [gradeOpen, setGradeOpen] = useState(false);
     const [dateOpen, setDateOpen] = useState(false);
 
-    const [gradingItems, setGradingItems] = useState(gradeItems);
-    const [dateItems, setDateItems] = useState([{ label: 'Select', value: null }]);
+    const [climbs, setClimbs] = useState([]);
+    const [filteredClimbs, setFilteredClimbs] = useState([]);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -46,13 +36,14 @@ const DeleteClimb = () => {
                 id: doc.id,
                 ...doc.data(),
             }));
+
             setClimbs(climbsData);
 
             const uniqueDates = [
                 { label: 'Select', value: null },
-                ...Array.from(new Set(climbsData.map((climb) => new Date(climb.date).toDateString())))
+                ...Array.from(new Set(climbsData.map((c) => new Date(c.date).toDateString())))
                     .sort((a, b) => new Date(b) - new Date(a))
-                    .map((date) => ({ label: date, value: date })),
+                    .map((d) => ({ label: d, value: d })),
             ];
             setDateItems(uniqueDates);
 
@@ -64,32 +55,58 @@ const DeleteClimb = () => {
 
     useEffect(() => {
         let newBaseItems = [];
+
         if (gradingSystem === 'Chromatic') {
-            newBaseItems = chromaticGrades.map((item, index) => ({
-                label: `Color ${index + 1}: ${item.color}`,
-                value: item.color
-            }));
+            newBaseItems = chromaticGrades.map((item) => item.color);
         } else {
-            newBaseItems = gradingSystems[gradingSystem] || [];
+            const systemGrades = gradingSystems[gradingSystem] || [];
+
+            newBaseItems = systemGrades.map((gradeObj) =>
+                gradeObj.value ?? gradeObj
+            );
         }
-        const newGradeItems = [{ label: 'Select', value: null }, ...newBaseItems];
+
+        const mappedItems = newBaseItems.map((grade) => {
+            if (isHexColor(grade)) {
+                return {
+                    label: '',
+                    value: grade,
+                    icon: () => (
+                        <View
+                            style={{
+                                width: 20,
+                                height: 20,
+                                backgroundColor: grade,
+                                borderRadius: 4,
+                                marginRight: 8,
+                            }}
+                        />
+                    ),
+                };
+            } else {
+                return {
+                    label: grade,
+                    value: grade,
+                };
+            }
+        });
+
+        const newGradeItems = [{ label: 'Select', value: null }, ...mappedItems];
         setGradingItems(newGradeItems);
     }, [gradingSystem, chromaticGrades]);
 
     const filterClimbs = (climbsData, gradeFilter, dateFilter) => {
-        let filtered = climbsData;
+        let filtered = [...climbsData];
 
         if (gradeFilter) {
             filtered = filtered.filter((climb) => climb.grade === gradeFilter);
         }
-
         if (dateFilter) {
             filtered = filtered.filter(
                 (climb) =>
                     new Date(climb.date).toDateString() === new Date(dateFilter).toDateString()
             );
         }
-
         setFilteredClimbs(filtered);
     };
 
@@ -157,9 +174,31 @@ const DeleteClimb = () => {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={tw`flex-row justify-between items-center mb-2`}>
-                        <Text style={tw`text-violet-200`}>
-                            {item.grade} - {new Date(item.date).toDateString()}
-                        </Text>
+                        <View style={tw`flex-row items-center`}>
+                            {isHexColor(item.grade) ? (
+                                <>
+                                    <View
+                                        style={[
+                                            {
+                                                width: 20,
+                                                height: 20,
+                                                borderRadius: 4,
+                                                backgroundColor: item.grade,
+                                                marginRight: 8,
+                                            },
+                                        ]}
+                                    />
+                                    <Text style={tw`text-violet-200`}>
+                                        {new Date(item.date).toDateString()}
+                                    </Text>
+                                </>
+                            ) : (
+                                <Text style={tw`text-violet-200`}>
+                                    {item.grade} - {new Date(item.date).toDateString()}
+                                </Text>
+                            )}
+                        </View>
+
                         <TouchableOpacity
                             onPress={() => handleDelete(item.id)}
                             style={tw`bg-red-500 p-2 rounded-2xl`}
