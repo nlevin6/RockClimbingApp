@@ -87,7 +87,7 @@ const ColorPickerComponent = () => {
     const blockSize = calculateBlockSize();
 
     return (
-        <Pressable style={tw`flex-1 p-4 bg-slate-900`} onPress={handleBackgroundPress}>
+        <Pressable style={tw`p-4 bg-slate-900`} onPress={handleBackgroundPress}>
             <DraggableFlatList
                 data={chromaticGrades}
                 renderItem={({ item, drag, isActive }) => (

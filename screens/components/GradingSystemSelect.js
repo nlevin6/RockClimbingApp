@@ -17,27 +17,24 @@ const GradingSystemSelect = () => {
     const [gradingOpen, setGradingOpen] = useState(false);
     const [localValue, setLocalValue] = useState(gradingSystem);
 
-    // Include "Chromatic"
     const [gradingItems, setGradingItems] = useState([
         { label: 'Hueco (USA)', value: 'Hueco (USA)' },
         { label: 'Fontainebleau', value: 'Fontainebleau' },
         { label: 'Yosemite Decimal System', value: 'Yosemite Decimal System' },
-        { label: 'Chromatic', value: 'Chromatic' }, // <-- Added
+        { label: 'Chromatic', value: 'Chromatic' },
     ]);
 
-    // Make sure localValue updates if gradingSystem changes in context
     useEffect(() => {
         setLocalValue(gradingSystem);
     }, [gradingSystem]);
 
     const handleChangeValue = async (value) => {
-        // Save to Firestore and context
         setGradingSystem(value);
         setLocalValue(value);
     };
 
     return (
-        <View style={tw`flex-1 pt-0 pb-4 px-4 bg-slate-900`}>
+        <View style={tw` px-4 bg-slate-900`}>
             <Text style={tw`text-violet-200 text-lg mb-2`}>Grading System</Text>
             <DropDownPicker
                 open={gradingOpen}
