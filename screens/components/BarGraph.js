@@ -7,7 +7,7 @@ import app from '../../firebaseConfig';
 
 const db = getFirestore(app);
 
-const BarGraph = () => {
+const BarGraph = ({ onBarSelect }) => {
     const [activeView, setActiveView] = useState('Week');
     const [climbData, setClimbData] = useState([]);
 
@@ -115,6 +115,22 @@ const BarGraph = () => {
                         }}
                         labels={({ datum }) => `${datum.value}`}
                         labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
+                        events={[
+                            {
+                                target: 'data',
+                                eventHandlers: {
+                                    onPressIn: (event, { datum }) => {
+                                        if (onBarSelect) {
+                                            onBarSelect({
+                                                view: activeView,
+                                                label: datum.day,
+                                                count: datum.value,
+                                            });
+                                        }
+                                    },
+                                },
+                            },
+                        ]}
                     />
                 </VictoryChart>
             </View>
