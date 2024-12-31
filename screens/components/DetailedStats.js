@@ -12,15 +12,26 @@ const DetailedStats = ({ activeView, label }) => {
     const [climbs, setClimbs] = useState([]);
     const [gradeColorMap, setGradeColorMap] = useState({});
     const { gradingSystem, chromaticGrades } = useGradingSystem();
+    const [animationComplete, setAnimationComplete] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
             const allClimbs = snapshot.docs.map((doc) => doc.data());
             const filtered = filterClimbs(allClimbs, activeView, label);
             setClimbs(filtered);
+            setAnimationComplete(false);
         });
         return () => unsubscribe();
     }, [activeView, label]);
+
+    useEffect(() => {
+        if (climbs.length > 0) {
+            const timer = setTimeout(() => {
+                setAnimationComplete(true);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [climbs]);
 
     const filterClimbs = (allClimbs, view, labelVal) => {
         const filtered = [];
@@ -68,7 +79,6 @@ const DetailedStats = ({ activeView, label }) => {
         return { start, end };
     };
 
-
     const gradeCounts = {};
     climbs.forEach((climb) => {
         const grade = climb.grade || 'Unknown';
@@ -107,13 +117,18 @@ const DetailedStats = ({ activeView, label }) => {
         return newColor;
     };
 
+    const isChromaticGrade = (grade) => {
+        return chromaticGrades.some(
+            (cg) => cg.color.toLowerCase() === grade.toLowerCase()
+        );
+    };
+
     const getDisplayLabel = (grade) => {
-        if (grade.startsWith('#')) {
+        if (grade.startsWith('#') || grade.startsWith('rgb(') || isChromaticGrade(grade)) {
             return '';
         }
         return grade;
     };
-
 
     const statsArray = Object.keys(sortedGradeCounts)
         .map((grade) => ({
@@ -168,27 +183,87 @@ const DetailedStats = ({ activeView, label }) => {
         return label;
     };
 
+    const calculateLabelPositions = (data, width, height) => {
+        const total = data.reduce((sum, d) => sum + d.y, 0);
+        let cumulative = 0;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const labelRadius = 190;
+
+        return data.map(d => {
+            const startAngle = (cumulative / total) * 360;
+            const endAngle = ((cumulative + d.y) / total) * 360;
+            const midAngle = (startAngle + endAngle) / 2;
+            cumulative += d.y;
+
+            const rad = (midAngle - 90) * (Math.PI / 180);
+
+            const x = centerX + labelRadius * Math.cos(rad);
+            const y = centerY + labelRadius * Math.sin(rad);
+
+            return {
+                x,
+                y,
+                label: getDisplayLabel(d.x),
+                color: getColorForGrade(d.x),
+            };
+        });
+    };
+
     return (
         <View style={tw`mt-4 bg-gray-800 p-4 rounded-lg items-center`}>
             <Text style={tw`text-violet-500 text-lg font-semibold mb-2`}>
                 Detailed Stats for {getFullLabel(label, activeView)}
             </Text>
 
-            <VictoryPie
-                data={pieData}
-                width={450}
-                height={450}
-                innerRadius={120}
-                labelRadius={180}
-                colorScale={pieData.map((d) => getColorForGrade(d.x))}
-                labels={({ datum }) => (
-                    datum.x.startsWith('#') ? '' : getDisplayLabel(datum.x)
+            <View style={{ position: 'relative', width: 450, height: 450 }}>
+                <VictoryPie
+                    data={pieData}
+                    width={450}
+                    height={450}
+                    innerRadius={120}
+                    labelRadius={180}
+                    colorScale={pieData.map((d) => getColorForGrade(d.x))}
+                    labels={() => ''}
+                    style={{
+                        labels: { fill: 'white', fontSize: 12 },
+                    }}
+                    animate={{
+                        data: {
+                            duration: 2000,
+                            easing: 'cubicInOut',
+                        },
+                        labels: {
+                            duration: 0,
+                        },
+                        onLoad: { duration: 2000 },
+                    }}
+                />
+
+                {animationComplete && (
+                    <View style={{ position: 'absolute', top: 0, left: 0, width: 450, height: 450 }}>
+                        {calculateLabelPositions(pieData, 450, 450).map((item, index) => (
+                            <Text
+                                key={index}
+                                style={{
+                                    position: 'absolute',
+                                    left: item.x,
+                                    top: item.y,
+                                    transform: [{ translateX: -10 }, { translateY: -10 }],
+                                    color: 'rgb(221, 214, 254)',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                    textShadowColor: 'black',
+                                    textShadowOffset: { width: 0.5, height: 0.5 },
+                                    textShadowRadius: 1,
+                                }}
+                            >
+                                {item.label}
+                            </Text>
+                        ))}
+                    </View>
                 )}
-                labelPosition="centroid"
-                style={{
-                    labels: { fill: 'white', fontSize: 12 },
-                }}
-            />
+            </View>
 
             <View style={tw`mt-6 w-full`}>
                 <Text style={tw`text-violet-500 text-lg font-semibold mb-4 text-left`}>
