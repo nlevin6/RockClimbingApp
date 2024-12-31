@@ -144,7 +144,7 @@ const DetailedStats = ({ activeView, label }) => {
 
     return (
         <View style={tw`mt-4 bg-gray-800 p-4 rounded-lg items-center`}>
-            <Text style={tw`text-white text-lg font-semibold mb-2`}>
+            <Text style={tw`text-violet-500 text-2xl font-bold mb-2`}>
                 Detailed Stats for {getFullLabel(label, activeView)}
             </Text>
 
@@ -165,7 +165,7 @@ const DetailedStats = ({ activeView, label }) => {
             />
 
             <View style={tw`mt-6 w-full`}>
-                <Text style={tw`text-white text-xl font-bold mb-4 text-left`}>
+                <Text style={tw`text-violet-500 text-xl font-bold mb-4 text-left`}>
                     Total Climbs: {climbs.length}
                 </Text>
 
@@ -182,7 +182,7 @@ const DetailedStats = ({ activeView, label }) => {
                                             ]}
                                         />
                                     )}
-                                    <Text style={tw`text-white text-base`}>
+                                    <Text style={tw`text-violet-200`}>
                                         {label}: {count}
                                     </Text>
                                 </View>
