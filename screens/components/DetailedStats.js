@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Animated } from 'react-native';
 import { VictoryPie } from 'victory-native';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import app from '../../firebaseConfig';
@@ -14,6 +14,7 @@ const DetailedStats = ({ activeView, label }) => {
     const { gradingSystem, chromaticGrades } = useGradingSystem();
     const [animationComplete, setAnimationComplete] = useState(false);
     const [selectedSegment, setSelectedSegment] = useState(null);
+    const [fadeAnim] = useState(new Animated.Value(0));
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -31,6 +32,23 @@ const DetailedStats = ({ activeView, label }) => {
             return () => clearTimeout(timer);
         }
     }, [climbs]);
+
+    useEffect(() => {
+        if (selectedSegment) {
+            fadeAnim.setValue(0);
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: true,
+            }).start(() => setSelectedSegment(null));
+        }
+    }, [selectedSegment]);
 
     const gradeCounts = climbs.reduce((counts, climb) => {
         const grade = climb.grade || 'Unknown';
@@ -229,7 +247,7 @@ const DetailedStats = ({ activeView, label }) => {
                                     </Text>
                                 )}
                                 {selectedSegment && selectedSegment.id === index && (
-                                    <Text
+                                    <Animated.Text
                                         style={{
                                             position: 'absolute',
                                             left: item.innerX,
@@ -241,10 +259,11 @@ const DetailedStats = ({ activeView, label }) => {
                                             textShadowColor: 'black',
                                             textShadowOffset: { width: 0.5, height: 0.5 },
                                             textShadowRadius: 1,
+                                            opacity: fadeAnim,
                                         }}
                                     >
                                         {((selectedSegment.y / pieData.reduce((sum, d) => sum + d.y, 0)) * 100).toFixed(1)}%
-                                    </Text>
+                                    </Animated.Text>
                                 )}
                             </React.Fragment>
                         ))}
