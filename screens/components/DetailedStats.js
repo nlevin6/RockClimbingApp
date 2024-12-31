@@ -26,15 +26,23 @@ const DetailedStats = ({ activeView, label }) => {
         const filtered = [];
         allClimbs.forEach((climb) => {
             const dateObj = new Date(climb.date);
+
             if (view === 'Week') {
+                const today = new Date();
+                const currentWeek = getWeekStartAndEnd(today);
                 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                if (dateObj.getDay() === dayNames.indexOf(labelVal)) {
+
+                if (
+                    dateObj >= currentWeek.start &&
+                    dateObj <= currentWeek.end &&
+                    dayNames[dateObj.getDay()] === labelVal
+                ) {
                     filtered.push(climb);
                 }
             } else if (view === 'Month') {
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                if (dateObj.getMonth() === monthNames.indexOf(labelVal)) {
+                if (monthNames[dateObj.getMonth()] === labelVal) {
                     filtered.push(climb);
                 }
             } else if (view === 'Year') {
@@ -45,6 +53,21 @@ const DetailedStats = ({ activeView, label }) => {
         });
         return filtered;
     };
+
+    const getWeekStartAndEnd = (date) => {
+        const dayOfWeek = date.getDay();
+        const start = new Date(date);
+        const end = new Date(date);
+
+        start.setDate(start.getDate() - dayOfWeek);
+        start.setHours(0, 0, 0, 0);
+
+        end.setDate(end.getDate() + (6 - dayOfWeek));
+        end.setHours(23, 59, 59, 999);
+
+        return { start, end };
+    };
+
 
     const gradeCounts = {};
     climbs.forEach((climb) => {
@@ -144,7 +167,7 @@ const DetailedStats = ({ activeView, label }) => {
 
     return (
         <View style={tw`mt-4 bg-gray-800 p-4 rounded-lg items-center`}>
-            <Text style={tw`text-violet-500 text-2xl font-bold mb-2`}>
+            <Text style={tw`text-violet-500 text-lg font-semibold mb-2`}>
                 Detailed Stats for {getFullLabel(label, activeView)}
             </Text>
 
@@ -165,7 +188,7 @@ const DetailedStats = ({ activeView, label }) => {
             />
 
             <View style={tw`mt-6 w-full`}>
-                <Text style={tw`text-violet-500 text-xl font-bold mb-4 text-left`}>
+                <Text style={tw`text-violet-500 text-lg font-semibold mb-4 text-left`}>
                     Total Climbs: {climbs.length}
                 </Text>
 

@@ -20,7 +20,7 @@ const Home = () => {
                 </View>
 
                 <View style={tw`bg-gray-800 p-4 rounded-t-3xl`}>
-                    <Text style={tw`text-violet-500 text-xl font-bold mb-2`}>Climbing Stats</Text>
+                    <Text style={tw`text-violet-500 text-2xl font-bold mb-2`}>Climbing Stats</Text>
                     <View style={tw`border-t border-gray-600 my-2`} />
 
                     <ClimbingStats />
