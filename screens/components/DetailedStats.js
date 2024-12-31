@@ -93,7 +93,8 @@ const DetailedStats = ({ activeView, label }) => {
             return obj;
         }, {});
 
-    const pieData = Object.keys(sortedGradeCounts).map((grade) => ({
+    const pieData = Object.keys(sortedGradeCounts).map((grade, index) => ({
+        id: index,
         x: grade,
         y: sortedGradeCounts[grade],
     }));
@@ -218,7 +219,12 @@ const DetailedStats = ({ activeView, label }) => {
     };
 
     const handleSegmentPress = (segment) => {
-        setSelectedSegment(segment);
+        const matchingSegment = pieData.find((data) => data.id === segment.id);
+        if (matchingSegment) {
+            setSelectedSegment(matchingSegment);
+        } else {
+            setSelectedSegment(null);
+        }
     };
 
     return (
@@ -249,37 +255,41 @@ const DetailedStats = ({ activeView, label }) => {
                         },
                         onLoad: { duration: 2000 },
                     }}
-                    events={[{
-                        target: "data",
-                        eventHandlers: {
-                            onPressIn: (evt, dataProps) => {
-                                handleSegmentPress(dataProps.datum);
+                    events={[
+                        {
+                            target: 'data',
+                            eventHandlers: {
+                                onPressIn: (evt, dataProps) => {
+                                    handleSegmentPress(dataProps.datum);
+                                },
                             },
                         },
-                    }]}
+                    ]}
                 />
 
                 {animationComplete && (
                     <View style={{ position: 'absolute', top: 0, left: 0, width: 450, height: 450 }}>
                         {calculateLabelPositions(pieData, 450, 450).map((item, index) => (
                             <React.Fragment key={index}>
-                                <Text
-                                    style={{
-                                        position: 'absolute',
-                                        left: item.x,
-                                        top: item.y,
-                                        transform: [{ translateX: -10 }, { translateY: -10 }],
-                                        color: 'rgb(221, 214, 254)',
-                                        fontSize: 12,
-                                        fontWeight: 'bold',
-                                        textShadowColor: 'black',
-                                        textShadowOffset: { width: 0.5, height: 0.5 },
-                                        textShadowRadius: 1,
-                                    }}
-                                >
-                                    {item.label}
-                                </Text>
-                                {selectedSegment && (selectedSegment.x === item.label || selectedSegment.x.toLowerCase() === item.color.toLowerCase()) && (
+                                {!item.label.startsWith('#') && item.label && (
+                                    <Text
+                                        style={{
+                                            position: 'absolute',
+                                            left: item.x,
+                                            top: item.y,
+                                            transform: [{ translateX: -10 }, { translateY: -10 }],
+                                            color: 'rgb(221, 214, 254)',
+                                            fontSize: 12,
+                                            fontWeight: 'bold',
+                                            textShadowColor: 'black',
+                                            textShadowOffset: { width: 0.5, height: 0.5 },
+                                            textShadowRadius: 1,
+                                        }}
+                                    >
+                                        {item.label}
+                                    </Text>
+                                )}
+                                {selectedSegment && selectedSegment.id === index && (
                                     <Text
                                         style={{
                                             position: 'absolute',
@@ -294,10 +304,14 @@ const DetailedStats = ({ activeView, label }) => {
                                             textShadowRadius: 1,
                                         }}
                                     >
-                                        {((selectedSegment.y / pieData.reduce((sum, d) => sum + d.y, 0)) * 100).toFixed(1)}%
+                                        {(
+                                            (selectedSegment.y /
+                                                pieData.reduce((sum, d) => sum + d.y, 0)) *
+                                            100
+                                        ).toFixed(1)}
+                                        %
                                     </Text>
                                 )}
-
                             </React.Fragment>
                         ))}
                     </View>
