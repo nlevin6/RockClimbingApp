@@ -114,15 +114,18 @@ const DetailedStats = ({ activeView, label }) => {
         return grade;
     };
 
-    const statsColumns = [];
-    const statsArray = Object.keys(sortedGradeCounts).map((grade) => ({
-        grade,
-        count: sortedGradeCounts[grade],
-        color: getColorForGrade(grade),
-        label: getDisplayLabel(grade),
-    }));
-    const columnCount = 4;
+
+    const statsArray = Object.keys(sortedGradeCounts)
+        .map((grade) => ({
+            grade,
+            count: sortedGradeCounts[grade],
+            color: getColorForGrade(grade),
+            label: getDisplayLabel(grade),
+        }))
+        .sort((a, b) => b.count - a.count);
+    const columnCount = 5;
     const itemsPerColumn = Math.ceil(statsArray.length / columnCount);
+    const statsColumns = [];
 
     for (let i = 0; i < columnCount; i++) {
         statsColumns.push(statsArray.slice(i * itemsPerColumn, (i + 1) * itemsPerColumn));
