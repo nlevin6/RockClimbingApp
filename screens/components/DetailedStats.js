@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { VictoryPie } from 'victory-native';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import app from '../../firebaseConfig';
@@ -13,6 +13,7 @@ const DetailedStats = ({ activeView, label }) => {
     const [gradeColorMap, setGradeColorMap] = useState({});
     const { gradingSystem, chromaticGrades } = useGradingSystem();
     const [animationComplete, setAnimationComplete] = useState(false);
+    const [selectedSegment, setSelectedSegment] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -189,6 +190,7 @@ const DetailedStats = ({ activeView, label }) => {
         const centerX = width / 2;
         const centerY = height / 2;
         const labelRadius = 190;
+        const innerLabelRadius = 105;
 
         return data.map(d => {
             const startAngle = (cumulative / total) * 360;
@@ -201,13 +203,22 @@ const DetailedStats = ({ activeView, label }) => {
             const x = centerX + labelRadius * Math.cos(rad);
             const y = centerY + labelRadius * Math.sin(rad);
 
+            const innerX = centerX + innerLabelRadius * Math.cos(rad);
+            const innerY = centerY + innerLabelRadius * Math.sin(rad);
+
             return {
                 x,
                 y,
+                innerX,
+                innerY,
                 label: getDisplayLabel(d.x),
                 color: getColorForGrade(d.x),
             };
         });
+    };
+
+    const handleSegmentPress = (segment) => {
+        setSelectedSegment(segment);
     };
 
     return (
@@ -238,28 +249,56 @@ const DetailedStats = ({ activeView, label }) => {
                         },
                         onLoad: { duration: 2000 },
                     }}
+                    events={[{
+                        target: "data",
+                        eventHandlers: {
+                            onPressIn: (evt, dataProps) => {
+                                handleSegmentPress(dataProps.datum);
+                            },
+                        },
+                    }]}
                 />
 
                 {animationComplete && (
                     <View style={{ position: 'absolute', top: 0, left: 0, width: 450, height: 450 }}>
                         {calculateLabelPositions(pieData, 450, 450).map((item, index) => (
-                            <Text
-                                key={index}
-                                style={{
-                                    position: 'absolute',
-                                    left: item.x,
-                                    top: item.y,
-                                    transform: [{ translateX: -10 }, { translateY: -10 }],
-                                    color: 'rgb(221, 214, 254)',
-                                    fontSize: 12,
-                                    fontWeight: 'bold',
-                                    textShadowColor: 'black',
-                                    textShadowOffset: { width: 0.5, height: 0.5 },
-                                    textShadowRadius: 1,
-                                }}
-                            >
-                                {item.label}
-                            </Text>
+                            <React.Fragment key={index}>
+                                <Text
+                                    style={{
+                                        position: 'absolute',
+                                        left: item.x,
+                                        top: item.y,
+                                        transform: [{ translateX: -10 }, { translateY: -10 }],
+                                        color: 'rgb(221, 214, 254)',
+                                        fontSize: 12,
+                                        fontWeight: 'bold',
+                                        textShadowColor: 'black',
+                                        textShadowOffset: { width: 0.5, height: 0.5 },
+                                        textShadowRadius: 1,
+                                    }}
+                                >
+                                    {item.label}
+                                </Text>
+                                {selectedSegment && (selectedSegment.x === item.label || selectedSegment.x.toLowerCase() === item.color.toLowerCase()) && (
+                                    <Text
+                                        style={{
+                                            position: 'absolute',
+                                            left: item.innerX,
+                                            top: item.innerY,
+                                            transform: [{ translateX: -10 }, { translateY: -10 }],
+                                            color: 'white',
+                                            fontSize: 12,
+                                            fontWeight: 'bold',
+                                            textShadowColor: 'black',
+                                            textShadowOffset: { width: 0.5, height: 0.5 },
+                                            textShadowRadius: 1,
+                                        }}
+                                    >
+                                        {((selectedSegment.y / pieData.reduce((sum, d) => sum + d.y, 0)) * 100).toFixed(1)}%
+                                    </Text>
+                                )}
+
+                            </React.Fragment>
                         ))}
                     </View>
                 )}
