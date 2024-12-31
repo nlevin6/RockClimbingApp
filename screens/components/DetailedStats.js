@@ -18,8 +18,8 @@ const DetailedStats = ({ activeView, label }) => {
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
             const allClimbs = snapshot.docs.map((doc) => doc.data());
-            const filtered = filterClimbs(allClimbs, activeView, label);
-            setClimbs(filtered);
+            const filteredClimbs = filterClimbs(allClimbs, activeView, label);
+            setClimbs(filteredClimbs);
             setAnimationComplete(false);
         });
         return () => unsubscribe();
@@ -27,69 +27,21 @@ const DetailedStats = ({ activeView, label }) => {
 
     useEffect(() => {
         if (climbs.length > 0) {
-            const timer = setTimeout(() => {
-                setAnimationComplete(true);
-            }, 1000);
+            const timer = setTimeout(() => setAnimationComplete(true), 1000);
             return () => clearTimeout(timer);
         }
     }, [climbs]);
 
-    const filterClimbs = (allClimbs, view, labelVal) => {
-        const filtered = [];
-        allClimbs.forEach((climb) => {
-            const dateObj = new Date(climb.date);
-
-            if (view === 'Week') {
-                const today = new Date();
-                const currentWeek = getWeekStartAndEnd(today);
-                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                if (
-                    dateObj >= currentWeek.start &&
-                    dateObj <= currentWeek.end &&
-                    dayNames[dateObj.getDay()] === labelVal
-                ) {
-                    filtered.push(climb);
-                }
-            } else if (view === 'Month') {
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                if (monthNames[dateObj.getMonth()] === labelVal) {
-                    filtered.push(climb);
-                }
-            } else if (view === 'Year') {
-                if (dateObj.getFullYear().toString() === labelVal) {
-                    filtered.push(climb);
-                }
-            }
-        });
-        return filtered;
-    };
-
-    const getWeekStartAndEnd = (date) => {
-        const dayOfWeek = date.getDay();
-        const start = new Date(date);
-        const end = new Date(date);
-
-        start.setDate(start.getDate() - dayOfWeek);
-        start.setHours(0, 0, 0, 0);
-
-        end.setDate(end.getDate() + (6 - dayOfWeek));
-        end.setHours(23, 59, 59, 999);
-
-        return { start, end };
-    };
-
-    const gradeCounts = {};
-    climbs.forEach((climb) => {
+    const gradeCounts = climbs.reduce((counts, climb) => {
         const grade = climb.grade || 'Unknown';
-        gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
-    });
+        counts[grade] = (counts[grade] || 0) + 1;
+        return counts;
+    }, {});
 
     const sortedGradeCounts = Object.entries(gradeCounts)
         .sort(([, countA], [, countB]) => countB - countA)
-        .reduce((obj, [key, value]) => {
-            obj[key] = value;
+        .reduce((obj, [grade, count]) => {
+            obj[grade] = count;
             return obj;
         }, {});
 
@@ -111,26 +63,18 @@ const DetailedStats = ({ activeView, label }) => {
         if (gradeColorMap[grade]) {
             return gradeColorMap[grade];
         }
-        const newColor = randomColor(
-            usedChromaticColors,
-            Object.values(gradeColorMap)
-        );
+        const newColor = randomColor(usedChromaticColors, Object.values(gradeColorMap));
         setGradeColorMap((prevMap) => ({ ...prevMap, [grade]: newColor }));
         return newColor;
     };
 
-    const isChromaticGrade = (grade) => {
-        return chromaticGrades.some(
-            (cg) => cg.color.toLowerCase() === grade.toLowerCase()
-        );
-    };
+    const isChromaticGrade = (grade) =>
+        chromaticGrades.some((cg) => cg.color.toLowerCase() === grade.toLowerCase());
 
-    const getDisplayLabel = (grade) => {
-        if (grade.startsWith('#') || grade.startsWith('rgb(') || isChromaticGrade(grade)) {
-            return '';
-        }
-        return grade;
-    };
+    const getDisplayLabel = (grade) =>
+        grade.startsWith('#') || grade.startsWith('rgb(') || isChromaticGrade(grade)
+            ? ''
+            : grade;
 
     const statsArray = Object.keys(sortedGradeCounts)
         .map((grade) => ({
@@ -140,13 +84,12 @@ const DetailedStats = ({ activeView, label }) => {
             label: getDisplayLabel(grade),
         }))
         .sort((a, b) => b.count - a.count);
+
     const columnCount = 5;
     const itemsPerColumn = Math.ceil(statsArray.length / columnCount);
-    const statsColumns = [];
-
-    for (let i = 0; i < columnCount; i++) {
-        statsColumns.push(statsArray.slice(i * itemsPerColumn, (i + 1) * itemsPerColumn));
-    }
+    const statsColumns = Array.from({ length: columnCount }, (_, i) =>
+        statsArray.slice(i * itemsPerColumn, (i + 1) * itemsPerColumn)
+    );
 
     const getFullLabel = (label, view) => {
         const daysMapping = {
@@ -193,7 +136,7 @@ const DetailedStats = ({ activeView, label }) => {
         const labelRadius = 190;
         const innerLabelRadius = 105;
 
-        return data.map(d => {
+        return data.map((d) => {
             const startAngle = (cumulative / total) * 360;
             const endAngle = ((cumulative + d.y) / total) * 360;
             const midAngle = (startAngle + endAngle) / 2;
@@ -220,11 +163,7 @@ const DetailedStats = ({ activeView, label }) => {
 
     const handleSegmentPress = (segment) => {
         const matchingSegment = pieData.find((data) => data.id === segment.id);
-        if (matchingSegment) {
-            setSelectedSegment(matchingSegment);
-        } else {
-            setSelectedSegment(null);
-        }
+        setSelectedSegment(matchingSegment || null);
     };
 
     return (
@@ -259,7 +198,7 @@ const DetailedStats = ({ activeView, label }) => {
                         {
                             target: 'data',
                             eventHandlers: {
-                                onPressIn: (evt, dataProps) => {
+                                onPressIn: (_, dataProps) => {
                                     handleSegmentPress(dataProps.datum);
                                 },
                             },
@@ -271,7 +210,7 @@ const DetailedStats = ({ activeView, label }) => {
                     <View style={{ position: 'absolute', top: 0, left: 0, width: 450, height: 450 }}>
                         {calculateLabelPositions(pieData, 450, 450).map((item, index) => (
                             <React.Fragment key={index}>
-                                {!item.label.startsWith('#') && item.label && (
+                                {item.label && !item.label.startsWith('#') && (
                                     <Text
                                         style={{
                                             position: 'absolute',
@@ -304,12 +243,7 @@ const DetailedStats = ({ activeView, label }) => {
                                             textShadowRadius: 1,
                                         }}
                                     >
-                                        {(
-                                            (selectedSegment.y /
-                                                pieData.reduce((sum, d) => sum + d.y, 0)) *
-                                            100
-                                        ).toFixed(1)}
-                                        %
+                                        {((selectedSegment.y / pieData.reduce((sum, d) => sum + d.y, 0)) * 100).toFixed(1)}%
                                     </Text>
                                 )}
                             </React.Fragment>
@@ -347,6 +281,47 @@ const DetailedStats = ({ activeView, label }) => {
             </View>
         </View>
     );
+};
+
+const filterClimbs = (allClimbs, view, labelVal) => {
+    return allClimbs.filter((climb) => {
+        const dateObj = new Date(climb.date);
+
+        if (view === 'Week') {
+            const today = new Date();
+            const currentWeek = getWeekStartAndEnd(today);
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            return (
+                dateObj >= currentWeek.start &&
+                dateObj <= currentWeek.end &&
+                dayNames[dateObj.getDay()] === labelVal
+            );
+        } else if (view === 'Month') {
+            const monthNames = [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+            ];
+            return monthNames[dateObj.getMonth()] === labelVal;
+        } else if (view === 'Year') {
+            return dateObj.getFullYear().toString() === labelVal;
+        }
+        return false;
+    });
+};
+
+const getWeekStartAndEnd = (date) => {
+    const dayOfWeek = date.getDay();
+    const start = new Date(date);
+    const end = new Date(date);
+
+    start.setDate(start.getDate() - dayOfWeek);
+    start.setHours(0, 0, 0, 0);
+
+    end.setDate(end.getDate() + (6 - dayOfWeek));
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
 };
 
 function randomColor(avoidChromaticColors, alreadyUsedRandomColors) {
