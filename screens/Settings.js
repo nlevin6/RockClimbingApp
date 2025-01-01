@@ -4,11 +4,9 @@ import tw from '../tailwind';
 import GradingSystemSelect from './components/GradingSystemSelect';
 import ColorPickerComponent from "./components/ColorPickerComponent";
 import { useGradingSystem } from './components/GradingContext';
-import { getAuth, signOut } from 'firebase/auth';
-import app from '../firebaseConfig';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-
-const auth = getAuth(app);
 
 const Settings = () => {
     const { gradingSystem } = useGradingSystem();

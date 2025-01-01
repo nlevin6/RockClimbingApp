@@ -8,6 +8,7 @@ import ChangePassword from './screens/components/ChangePassword';
 import {LogBox} from 'react-native';
 import {GradingProvider} from './screens/components/GradingContext';
 import ForgotPassword from "./screens/components/ForgotPassword";
+import AuthLoading from './AuthLoading';
 
 if (__DEV__) {
     LogBox.ignoreLogs([
@@ -22,7 +23,12 @@ export default function App() {
         <GradingProvider>
             <NavigationContainer>
                 <StatusBar style="light"/>
-                <Stack.Navigator initialRouteName="Login">
+                <Stack.Navigator initialRouteName="AuthLoading">
+                    <Stack.Screen
+                        name="AuthLoading"
+                        component={AuthLoading}
+                        options={{ headerShown: false }}
+                    />
                     <Stack.Screen
                         name="Login"
                         component={Login}

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import app from '../firebaseConfig';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 import tw from '../tailwind';
-
-const auth = getAuth(app);
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -41,14 +39,13 @@ const Login = () => {
         Keyboard.dismiss();
         signInWithEmailAndPassword(auth, email, password)
             .then(() => {
-                navigation.navigate('Home');
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Home' }],
+                });
             })
-            .catch((error) => {
-                const errorMessage = getCustomErrorMessage(error.code);
-                Alert.alert('Login Failed', errorMessage);
-            });
+            .catch((error) => Alert.alert('Login Failed', error.message));
     };
-
 
     return (
         <View style={tw`flex-1 justify-center items-center bg-slate-900 px-4`}>
@@ -90,7 +87,6 @@ const Login = () => {
             <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
             </TouchableOpacity>
-
         </View>
     );
 };
