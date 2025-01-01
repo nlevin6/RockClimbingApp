@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import tw from '../../tailwind';
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, signOut } from 'firebase/auth';
-import app from '../../firebaseConfig';
-
-const auth = getAuth(app);
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, signOut } from 'firebase/auth';
+import { auth } from '../../firebaseConfig';
 
 const ChangePassword = () => {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -50,49 +48,54 @@ const ChangePassword = () => {
     };
 
     return (
-        <View style={tw`flex-1 justify-center items-center bg-slate-900 px-4`}>
-            <TouchableOpacity
-                style={tw`flex-row items-center absolute top-12 left-4`}
-                onPress={() => navigation.goBack()}
-            >
-                <Icon name="arrow-back" size={24} color="#7C3AED" />
-                <Text style={tw`text-violet-700 text-lg font-bold ml-2`}>Back</Text>
-            </TouchableOpacity>
-            <Text style={tw`text-3xl font-bold mb-6 text-violet-600 text-center`}>Change Password</Text>
-            <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
-                placeholder="Current Password"
-                placeholderTextColor="#64748B"
-                secureTextEntry
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-            />
-            <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
-                placeholder="New Password"
-                placeholderTextColor="#64748B"
-                secureTextEntry
-                value={newPassword}
-                onChangeText={setNewPassword}
-            />
-            <TextInput
-                style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
-                placeholder="Confirm New Password"
-                placeholderTextColor="#64748B"
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-            />
-            <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
-                {'Password must be at least 6 characters long'}
-            </Text>
-            <TouchableOpacity
-                style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
-                onPress={handleChangePassword}
-            >
-                <Text style={tw`text-white text-center font-bold`}>Update Password</Text>
-            </TouchableOpacity>
-        </View>
+        <KeyboardAvoidingView
+            style={tw`flex-1 bg-slate-900`}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjusts behavior based on platform
+        >
+            <ScrollView contentContainerStyle={tw`flex-grow justify-center items-center px-4`}>
+                <TouchableOpacity
+                    style={tw`flex-row items-center absolute top-12 left-4`}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Icon name="arrow-back" size={24} color="#7C3AED" />
+                    <Text style={tw`text-violet-700 text-lg font-bold ml-2`}>Back</Text>
+                </TouchableOpacity>
+                <Text style={tw`text-3xl font-bold mb-6 text-violet-600 text-center`}>Change Password</Text>
+                <TextInput
+                    style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    placeholder="Current Password"
+                    placeholderTextColor="#64748B"
+                    secureTextEntry
+                    value={currentPassword}
+                    onChangeText={setCurrentPassword}
+                />
+                <TextInput
+                    style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    placeholder="New Password"
+                    placeholderTextColor="#64748B"
+                    secureTextEntry
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                />
+                <TextInput
+                    style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    placeholder="Confirm New Password"
+                    placeholderTextColor="#64748B"
+                    secureTextEntry
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                />
+                <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
+                    {'Password must be at least 6 characters long'}
+                </Text>
+                <TouchableOpacity
+                    style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
+                    onPress={handleChangePassword}
+                >
+                    <Text style={tw`text-white text-center font-bold`}>Update Password</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 

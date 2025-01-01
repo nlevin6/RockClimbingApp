@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -48,46 +48,51 @@ const Login = () => {
     };
 
     return (
-        <View style={tw`flex-1 justify-center items-center bg-slate-900 px-4`}>
-            <Text style={tw`text-3xl font-bold mb-6 text-violet-600`}>
-                {isRegistering ? 'Register' : 'Login'}
-            </Text>
-            <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
-                placeholder="Email"
-                placeholderTextColor="#64748B"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-            />
-            <TextInput
-                style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
-                placeholder="Password"
-                placeholderTextColor="#64748B"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
-                {'Password must be at least 6 characters long'}
-            </Text>
-            <TouchableOpacity
-                style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
-                onPress={isRegistering ? handleRegister : handleLogin}
-            >
-                <Text style={tw`text-white text-center font-bold`}>
+        <KeyboardAvoidingView
+            style={tw`flex-1 bg-slate-900`}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <ScrollView contentContainerStyle={tw`flex-grow justify-center items-center px-4`}>
+                <Text style={tw`text-3xl font-bold mb-6 text-violet-600`}>
                     {isRegistering ? 'Register' : 'Login'}
                 </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
-                <Text style={tw`text-violet-300`}>
-                    {isRegistering ? 'Already have an account? Log in' : 'Don\'t have an account? Register'}
+                <TextInput
+                    style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    placeholder="Email"
+                    placeholderTextColor="#64748B"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                />
+                <TextInput
+                    style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    placeholder="Password"
+                    placeholderTextColor="#64748B"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+                <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
+                    {'Password must be at least 6 characters long'}
                 </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
-            </TouchableOpacity>
-        </View>
+                <TouchableOpacity
+                    style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
+                    onPress={isRegistering ? handleRegister : handleLogin}
+                >
+                    <Text style={tw`text-white text-center font-bold`}>
+                        {isRegistering ? 'Register' : 'Login'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
+                    <Text style={tw`text-violet-300`}>
+                        {isRegistering ? 'Already have an account? Log in' : 'Don\'t have an account? Register'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                    <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 
