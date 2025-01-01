@@ -24,12 +24,18 @@ export default function App() {
                     <Stack.Screen
                         name="Login"
                         component={Login}
-                        options={{ headerShown: false }}
+                        options={{
+                            headerShown: false,
+                            gestureEnabled: false,
+                        }}
                     />
                     <Stack.Screen
                         name="Home"
                         component={BottomNav}
-                        options={{ headerShown: false }}
+                        options={{
+                            headerShown: false,
+                            gestureEnabled: false,
+                        }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
