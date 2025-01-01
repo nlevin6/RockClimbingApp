@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import Login from './screens/Login';
 import BottomNav from './screens/components/BottomNav';
+import ChangePassword from './screens/components/ChangePassword';
 import { LogBox } from 'react-native';
 import { GradingProvider } from './screens/components/GradingContext';
 
@@ -35,6 +36,13 @@ export default function App() {
                         options={{
                             headerShown: false,
                             gestureEnabled: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChangePassword"
+                        component={ChangePassword}
+                        options={{
+                            headerShown: false,
                         }}
                     />
                 </Stack.Navigator>

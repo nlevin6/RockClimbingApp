@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import tw from '../tailwind';
 import GradingSystemSelect from './components/GradingSystemSelect';
 import ColorPickerComponent from "./components/ColorPickerComponent";
@@ -17,14 +17,12 @@ const Settings = () => {
     const handleLogout = () => {
         signOut(auth)
             .then(() => {
-                Alert.alert('Logged Out', 'You have been successfully logged out.');
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'Login' }],
                 });
             })
             .catch((error) => {
-                Alert.alert('Error', 'An error occurred while logging out. Please try again.');
                 console.error(error);
             });
     };
@@ -38,9 +36,15 @@ const Settings = () => {
                     <ColorPickerComponent />
                 )}
             </View>
-            <View style={tw`p-4`}>
+            <View style={tw`p-4 space-y-4`}>
                 <TouchableOpacity
-                    style={tw`bg-red-500 bg-opacity-30 py-3 rounded-3xl border border-red-600 items-center mb-4`}
+                    style={tw`bg-violet-600 bg-opacity-30 py-3 rounded-3xl items-center border border-violet-600 mb-2`}
+                    onPress={() => navigation.navigate('ChangePassword')}
+                >
+                    <Text style={tw`text-violet-600 text-lg font-bold`}>Change Password</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={tw`bg-red-500 bg-opacity-30 py-3 rounded-3xl border border-red-600 items-center mb-2`}
                     onPress={handleLogout}
                 >
                     <Text style={tw`text-red-600 text-lg font-bold`}>Logout</Text>
