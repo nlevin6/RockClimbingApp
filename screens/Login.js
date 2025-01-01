@@ -87,6 +87,10 @@ const Login = () => {
                     {isRegistering ? 'Already have an account? Log in' : 'Don\'t have an account? Register'}
                 </Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
+            </TouchableOpacity>
+
         </View>
     );
 };

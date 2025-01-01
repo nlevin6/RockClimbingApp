@@ -1,12 +1,13 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { StatusBar } from 'expo-status-bar';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {StatusBar} from 'expo-status-bar';
 import Login from './screens/Login';
 import BottomNav from './screens/components/BottomNav';
 import ChangePassword from './screens/components/ChangePassword';
-import { LogBox } from 'react-native';
-import { GradingProvider } from './screens/components/GradingContext';
+import {LogBox} from 'react-native';
+import {GradingProvider} from './screens/components/GradingContext';
+import ForgotPassword from "./screens/components/ForgotPassword";
 
 if (__DEV__) {
     LogBox.ignoreLogs([
@@ -20,7 +21,7 @@ export default function App() {
     return (
         <GradingProvider>
             <NavigationContainer>
-                <StatusBar style="light" />
+                <StatusBar style="light"/>
                 <Stack.Navigator initialRouteName="Login">
                     <Stack.Screen
                         name="Login"
@@ -41,6 +42,13 @@ export default function App() {
                     <Stack.Screen
                         name="ChangePassword"
                         component={ChangePassword}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ForgotPassword"
+                        component={ForgotPassword}
                         options={{
                             headerShown: false,
                         }}
