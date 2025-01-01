@@ -87,7 +87,7 @@ const ChangePassword = () => {
                 {'Password must be at least 6 characters long'}
             </Text>
             <TouchableOpacity
-                style={tw`w-3/4 p-3 mb-4 rounded bg-violet-800`}
+                style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
                 onPress={handleChangePassword}
             >
                 <Text style={tw`text-white text-center font-bold`}>Update Password</Text>
