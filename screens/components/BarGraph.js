@@ -10,6 +10,7 @@ const db = getFirestore(app);
 const BarGraph = ({ onBarSelect }) => {
     const [activeView, setActiveView] = useState('Week');
     const [climbData, setClimbData] = useState([]);
+    const [graphKey, setGraphKey] = useState(0); // Used to force re-render the graph
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
@@ -78,6 +79,13 @@ const BarGraph = ({ onBarSelect }) => {
         }
 
         setClimbData(aggregatedData);
+        setGraphKey((prevKey) => prevKey + 1); // Trigger graph re-render only after data updates
+    };
+
+    const handleViewChange = (view) => {
+        if (view !== activeView) {
+            setActiveView(view); // Trigger useEffect to update climbData and re-render
+        }
     };
 
     return (
@@ -86,7 +94,7 @@ const BarGraph = ({ onBarSelect }) => {
                 {['Week', 'Month', 'Year'].map((view) => (
                     <TouchableOpacity
                         key={view}
-                        onPress={() => setActiveView(view)}
+                        onPress={() => handleViewChange(view)}
                         style={tw`px-4 py-2 mx-2 rounded-2xl ${
                             activeView === view ? 'bg-violet-600' : 'bg-gray-700'
                         }`}
@@ -97,7 +105,12 @@ const BarGraph = ({ onBarSelect }) => {
             </View>
 
             <View style={tw`items-center`}>
-                <VictoryChart domainPadding={{ x: 30 }} padding={{ top: 20, bottom: 30, left: 20, right: 20 }}>
+                <VictoryChart
+                    key={graphKey} // Force new graph instance
+                    domainPadding={{ x: 30 }}
+                    padding={{ top: 20, bottom: 30, left: 20, right: 20 }}
+                    animate={{ duration: 500 }} // Animate chart transitions
+                >
                     <VictoryAxis
                         style={{
                             axis: { stroke: '#fff', strokeWidth: 2 },
