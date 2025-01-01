@@ -117,7 +117,6 @@ const DeleteClimb = () => {
             [
                 {
                     text: 'Cancel',
-                    onPress: () => console.log('Delete cancelled'),
                     style: 'cancel',
                 },
                 {
