@@ -60,22 +60,25 @@ const ChangePassword = () => {
             </TouchableOpacity>
             <Text style={tw`text-3xl font-bold mb-6 text-violet-600 text-center`}>Change Password</Text>
             <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-gray-300 rounded bg-white`}
+                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                 placeholder="Current Password"
+                placeholderTextColor="#64748B"
                 secureTextEntry
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
             />
             <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-gray-300 rounded bg-white`}
+                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                 placeholder="New Password"
+                placeholderTextColor="#64748B"
                 secureTextEntry
                 value={newPassword}
                 onChangeText={setNewPassword}
             />
             <TextInput
-                style={tw`w-3/4 p-3 mb-1 border border-gray-300 rounded bg-white`}
+                style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                 placeholder="Confirm New Password"
+                placeholderTextColor="#64748B"
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}

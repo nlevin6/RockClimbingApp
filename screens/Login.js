@@ -56,15 +56,17 @@ const Login = () => {
                 {isRegistering ? 'Register' : 'Login'}
             </Text>
             <TextInput
-                style={tw`w-3/4 p-3 mb-4 border border-gray-300 rounded bg-white`}
+                style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                 placeholder="Email"
+                placeholderTextColor="#64748B"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
             />
             <TextInput
-                style={tw`w-3/4 p-3 mb-1 border border-gray-300 rounded bg-white`}
+                style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                 placeholder="Password"
+                placeholderTextColor="#64748B"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
