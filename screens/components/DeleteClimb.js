@@ -111,14 +111,32 @@ const DeleteClimb = () => {
     };
 
     const handleDelete = async (id) => {
-        try {
-            await deleteDoc(doc(db, 'climbs', id));
-            Alert.alert('Success', 'Climb deleted successfully!');
-        } catch (error) {
-            Alert.alert('Error', 'Failed to delete climb');
-            console.error(error);
-        }
+        Alert.alert(
+            'Confirm Delete',
+            'Are you sure you want to delete this climb?',
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Delete cancelled'),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    onPress: async () => {
+                        try {
+                            await deleteDoc(doc(db, 'climbs', id));
+                            Alert.alert('Success', 'Climb deleted successfully!');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete climb');
+                            console.error(error);
+                        }
+                    },
+                    style: 'destructive',
+                },
+            ]
+        );
     };
+
 
     const resetDropdowns = (except) => {
         if (except !== 'grade') setGradeOpen(false);
