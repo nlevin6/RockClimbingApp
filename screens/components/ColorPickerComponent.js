@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
@@ -6,6 +6,7 @@ import DraggableFlatList from 'react-native-draggable-flatlist';
 import { nanoid } from 'nanoid/non-secure';
 import tw from '../../tailwind';
 import { useGradingSystem } from './GradingContext';
+import { debounce } from 'lodash';
 
 const ColorPickerComponent = () => {
     const { chromaticGrades, setChromaticGrades } = useGradingSystem();
@@ -13,33 +14,45 @@ const ColorPickerComponent = () => {
     const [tempColor, setTempColor] = useState({ h: 0, s: 100, v: 100 });
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
+    const [localSaturation, setLocalSaturation] = useState(tempColor.s);
+    const [localBrightness, setLocalBrightness] = useState(tempColor.v);
 
     const toggleModal = () => {
         setIsModalVisible(!isModalVisible);
     };
 
-    const handleColorChange = (selectedColor) => {
-        if (selectedColor) {
-            setTempColor((prev) => ({
-                ...prev,
-                h: selectedColor.h,
+    const handleColorChange = useRef(debounce((selectedColor) => {
+    if (selectedColor) {
+        setTempColor((prev) => ({
+            ...prev,
+            h: selectedColor.h,
             }));
         }
-    };
+    }, 100)).current;
 
     const handleSaturationChange = (value) => {
+        setLocalSaturation(value);
+        debounceSaturationChange(value);
+    };
+
+    const debounceSaturationChange = useRef(debounce((value) => {
         setTempColor((prev) => ({
             ...prev,
             s: value,
         }));
-    };
+    }, 100)).current;
 
     const handleBrightnessChange = (value) => {
+        setLocalBrightness(value);
+        debounceBrightnessChange(value);
+    };
+
+    const debounceBrightnessChange = useRef(debounce((value) => {
         setTempColor((prev) => ({
             ...prev,
             v: value,
         }));
-    };
+    }, 100)).current;
 
     const handleSelectColor = () => {
         const hexColor = hsvToHex(tempColor.h, tempColor.s, tempColor.v);
@@ -84,7 +97,6 @@ const ColorPickerComponent = () => {
     const blockSize = calculateBlockSize();
 
     const onDragEnd = ({ data }) => {
-        // Reassign keys after drag to avoid key conflicts
         const updatedData = data.map((item) => ({ ...item, key: nanoid() }));
         setChromaticGrades(updatedData);
     };
