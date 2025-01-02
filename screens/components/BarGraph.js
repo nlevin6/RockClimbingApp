@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from 'victory-native';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../../firebaseConfig';
 import tw from '../../tailwind';
-import app from '../../firebaseConfig';
-
-const db = getFirestore(app);
 
 const BarGraph = ({ onBarSelect }) => {
     const [activeView, setActiveView] = useState('Week');
     const [climbData, setClimbData] = useState([]);
-    const [graphKey, setGraphKey] = useState(0); // Used to force re-render the graph
+    const [graphKey, setGraphKey] = useState(0);
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
-            const data = snapshot.docs.map((doc) => doc.data());
-            processClimbData(data);
-        });
+        const user = auth.currentUser;
+
+        if (!user) {
+            Alert.alert('Error', 'No user logged in. Please log in to view your climbs.');
+            return;
+        }
+
+        const userClimbsRef = collection(db, `users/${user.uid}/climbs`);
+
+        const unsubscribe = onSnapshot(
+            userClimbsRef,
+            (snapshot) => {
+                const data = snapshot.docs.map((doc) => doc.data());
+                processClimbData(data);
+            },
+            () => {
+                Alert.alert('Error', 'Failed to fetch climbs. Please try again later.');
+            }
+        );
+
         return () => unsubscribe();
     }, [activeView]);
 
@@ -36,7 +50,13 @@ const BarGraph = ({ onBarSelect }) => {
             const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
 
             data.forEach((climb) => {
+                if (!climb.date) {
+                    return;
+                }
                 const climbDate = new Date(climb.date);
+                if (isNaN(climbDate)) {
+                    return;
+                }
                 if (climbDate >= startOfWeek && climbDate <= endOfWeek) {
                     const day = climbDate.getDay();
                     const dayMapping = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -53,7 +73,13 @@ const BarGraph = ({ onBarSelect }) => {
             const monthCounts = Array(12).fill(0);
 
             data.forEach((climb) => {
+                if (!climb.date) {
+                    return;
+                }
                 const climbDate = new Date(climb.date);
+                if (isNaN(climbDate)) {
+                    return;
+                }
                 if (climbDate.getFullYear() === currentYear) {
                     const month = climbDate.getMonth();
                     monthCounts[month] += 1;
@@ -68,7 +94,14 @@ const BarGraph = ({ onBarSelect }) => {
         } else if (activeView === 'Year') {
             const yearCounts = {};
             data.forEach((climb) => {
-                const year = new Date(climb.date).getFullYear();
+                if (!climb.date) {
+                    return;
+                }
+                const climbDate = new Date(climb.date);
+                if (isNaN(climbDate)) {
+                    return;
+                }
+                const year = climbDate.getFullYear();
                 yearCounts[year] = (yearCounts[year] || 0) + 1;
             });
 
@@ -79,12 +112,12 @@ const BarGraph = ({ onBarSelect }) => {
         }
 
         setClimbData(aggregatedData);
-        setGraphKey((prevKey) => prevKey + 1); // Trigger graph re-render only after data updates
+        setGraphKey((prevKey) => prevKey + 1);
     };
 
     const handleViewChange = (view) => {
         if (view !== activeView) {
-            setActiveView(view); // Trigger useEffect to update climbData and re-render
+            setActiveView(view);
         }
     };
 
@@ -104,48 +137,53 @@ const BarGraph = ({ onBarSelect }) => {
                 ))}
             </View>
 
-            <View style={tw`items-center`}>
-                <VictoryChart
-                    key={graphKey} // Force new graph instance
-                    domainPadding={{ x: 30 }}
-                    padding={{ top: 20, bottom: 30, left: 20, right: 20 }}
-                    animate={{ duration: 500 }} // Animate chart transitions
-                >
-                    <VictoryAxis
-                        style={{
-                            axis: { stroke: '#fff', strokeWidth: 2 },
-                            tickLabels: { fontSize: 12, fill: '#fff' },
-                        }}
-                    />
-                    <VictoryBar
-                        data={climbData}
-                        x="day"
-                        y="value"
-                        barWidth={15}
-                        cornerRadius={{ top: 5 }}
-                        style={{
-                            data: { fill: 'rgb(124, 58, 237)' },
-                        }}
-                        labels={({ datum }) => `${datum.value}`}
-                        labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
-                        events={[
-                            {
-                                target: 'data',
-                                eventHandlers: {
-                                    onPressIn: (event, { datum }) => {
-                                        if (onBarSelect) {
-                                            onBarSelect({
-                                                view: activeView,
-                                                label: datum.day,
-                                                count: datum.value,
-                                            });
-                                        }
+            <View style={tw`items-center h-80`}>
+                {climbData.length > 0 ? (
+                    <VictoryChart
+                        key={graphKey}
+                        domainPadding={{ x: 30 }}
+                        padding={{ top: 20, bottom: 30, left: 20, right: 20 }}
+                        animate={{ duration: 500 }}
+                        height={300}
+                    >
+                        <VictoryAxis
+                            style={{
+                                axis: { stroke: '#fff', strokeWidth: 2 },
+                                tickLabels: { fontSize: 12, fill: '#fff' },
+                            }}
+                        />
+                        <VictoryBar
+                            data={climbData}
+                            x="day"
+                            y="value"
+                            barWidth={15}
+                            cornerRadius={{ top: 5 }}
+                            style={{
+                                data: { fill: 'rgb(124, 58, 237)' },
+                            }}
+                            labels={({ datum }) => `${datum.value}`}
+                            labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
+                            events={[
+                                {
+                                    target: 'data',
+                                    eventHandlers: {
+                                        onPressIn: (event, { datum }) => {
+                                            if (onBarSelect) {
+                                                onBarSelect({
+                                                    view: activeView,
+                                                    label: datum.day,
+                                                    count: datum.value,
+                                                });
+                                            }
+                                        },
                                     },
                                 },
-                            },
-                        ]}
-                    />
-                </VictoryChart>
+                            ]}
+                        />
+                    </VictoryChart>
+                ) : (
+                    <Text style={tw`text-white`}>No climb data available for this view.</Text>
+                )}
             </View>
         </View>
     );

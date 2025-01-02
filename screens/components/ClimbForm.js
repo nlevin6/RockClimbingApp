@@ -4,11 +4,9 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
-import app from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
 import { useGradingSystem } from './GradingContext';
 import gradingSystems from '../constants/gradingSystems';
-
-const db = getFirestore(app);
 
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
@@ -115,9 +113,15 @@ const ClimbForm = ({ navigation }) => {
         }
 
         const selectedDate = new Date(year, month - 1, day);
+        const user = auth.currentUser;
+        if (!user) {
+            Alert.alert('Error', 'You must be logged in to add a climb.');
+            return;
+        }
 
         try {
-            await addDoc(collection(db, 'climbs'), {
+            const userDocRef = collection(db, `users/${user.uid}/climbs`);
+            await addDoc(userDocRef, {
                 grade,
                 date: selectedDate.toISOString(),
             });
@@ -127,6 +131,7 @@ const ClimbForm = ({ navigation }) => {
             console.error(error);
         }
     };
+
 
     return (
         <View style={tw`p-4 bg-slate-900`}>

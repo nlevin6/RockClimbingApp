@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { getFirestore, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
-import app from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
 import { useGradingSystem } from "./GradingContext";
 import gradingSystems from '../../screens/constants/gradingSystems';
-
-const db = getFirestore(app);
 
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
@@ -31,14 +29,16 @@ const DeleteClimb = () => {
     const [filteredClimbs, setFilteredClimbs] = useState([]);
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const unsubscribe = onSnapshot(collection(db, `users/${user.uid}/climbs`), (snapshot) => {
             const climbsData = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
 
             setClimbs(climbsData);
-
             const uniqueDates = [
                 { label: 'Select', value: null },
                 ...Array.from(new Set(climbsData.map((c) => new Date(c.date).toDateString())))
@@ -52,6 +52,37 @@ const DeleteClimb = () => {
 
         return () => unsubscribe();
     }, [selectedGrade, selectedDate]);
+
+    const handleDelete = async (id) => {
+        const user = auth.currentUser;
+        if (!user) {
+            Alert.alert('Error', 'You must be logged in to delete a climb.');
+            return;
+        }
+
+        Alert.alert(
+            'Confirm Delete',
+            'Are you sure you want to delete this climb?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    onPress: async () => {
+                        try {
+                            await deleteDoc(doc(db, `users/${user.uid}/climbs`, id));
+                            Alert.alert('Success', 'Climb deleted successfully!');
+                        } catch {
+                            Alert.alert('Error', 'Failed to delete climb');
+                        }
+                    },
+                    style: 'destructive',
+                },
+            ]
+        );
+    };
 
     useEffect(() => {
         let newBaseItems = [];
@@ -109,33 +140,6 @@ const DeleteClimb = () => {
         }
         setFilteredClimbs(filtered);
     };
-
-    const handleDelete = async (id) => {
-        Alert.alert(
-            'Confirm Delete',
-            'Are you sure you want to delete this climb?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete',
-                    onPress: async () => {
-                        try {
-                            await deleteDoc(doc(db, 'climbs', id));
-                            Alert.alert('Success', 'Climb deleted successfully!');
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to delete climb');
-                            console.error(error);
-                        }
-                    },
-                    style: 'destructive',
-                },
-            ]
-        );
-    };
-
 
     const resetDropdowns = (except) => {
         if (except !== 'grade') setGradeOpen(false);

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import { getFirestore, collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import app from '../../firebaseConfig';
+import React, {useEffect, useState} from 'react';
+import {View, Text} from 'react-native';
+import {collection, onSnapshot, orderBy, query} from 'firebase/firestore';
+import {auth, db} from '../../firebaseConfig';
 import tw from '../../tailwind';
 
 const ClimbingStats = () => {
@@ -9,9 +9,12 @@ const ClimbingStats = () => {
     const [lastClimbedDate, setLastClimbedDate] = useState(null);
 
     useEffect(() => {
-        const db = getFirestore(app);
-        const climbsRef = collection(db, 'climbs');
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const climbsRef = collection(db, `users/${user.uid}/climbs`);
         const q = query(climbsRef, orderBy('date', 'desc'));
+
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const climbs = snapshot.docs.map((doc) => doc.data());
             setTotalClimbs(climbs.length);
@@ -21,8 +24,10 @@ const ClimbingStats = () => {
                 setLastClimbedDate(null);
             }
         });
+
         return () => unsubscribe();
     }, []);
+
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';

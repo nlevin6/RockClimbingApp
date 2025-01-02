@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import app from '../../firebaseConfig';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig';
 
 const GradingContext = createContext();
 
-const db = getFirestore(app);
 
 export const GradingProvider = ({ children }) => {
     const [gradingSystem, setGradingSystem] = useState('Hueco (USA)');
@@ -12,18 +11,17 @@ export const GradingProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchGradingSettings = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
             try {
-                const docRef = doc(db, 'settings', 'grading');
+                const docRef = doc(db, `users/${user.uid}/settings`, 'grading');
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data.gradingSystem) {
-                        setGradingSystem(data.gradingSystem);
-                    }
-                    if (data.chromaticGrades) {
-                        setChromaticGrades(data.chromaticGrades);
-                    }
+                    if (data.gradingSystem) setGradingSystem(data.gradingSystem);
+                    if (data.chromaticGrades) setChromaticGrades(data.chromaticGrades);
                 }
             } catch (error) {
                 console.error('Error fetching grading system:', error);
@@ -34,17 +32,21 @@ export const GradingProvider = ({ children }) => {
     }, []);
 
     const updateGradingSystem = async (newSystem) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
         try {
-            const docRef = doc(db, 'settings', 'grading');
+            const docRef = doc(db, `users/${user.uid}/settings`, 'grading');
             await setDoc(docRef, {
                 gradingSystem: newSystem,
-                chromaticGrades
+                chromaticGrades,
             }, { merge: true });
             setGradingSystem(newSystem);
         } catch (error) {
             console.error('Error saving grading system:', error);
         }
     };
+
 
     const updateChromaticGrades = async (newChromaticGrades) => {
         try {

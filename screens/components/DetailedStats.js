@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Animated } from 'react-native';
+import { View, Text, Animated, Alert } from 'react-native';
 import { VictoryPie } from 'victory-native';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
-import app from '../../firebaseConfig';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../../firebaseConfig';
 import tw from '../../tailwind';
 import { useGradingSystem } from './GradingContext';
-
-const db = getFirestore(app);
 
 const DetailedStats = ({ activeView, label }) => {
     const [climbs, setClimbs] = useState([]);
@@ -17,12 +15,28 @@ const DetailedStats = ({ activeView, label }) => {
     const [fadeAnim] = useState(new Animated.Value(0));
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'climbs'), (snapshot) => {
-            const allClimbs = snapshot.docs.map((doc) => doc.data());
-            const filteredClimbs = filterClimbs(allClimbs, activeView, label);
-            setClimbs(filteredClimbs);
-            setAnimationComplete(false);
-        });
+        const user = auth.currentUser;
+        if (!user) {
+            Alert.alert('Error', 'No user logged in. Please log in to view your climbs.');
+            return;
+        }
+
+        const collectionPath = `users/${user.uid}/climbs`;
+        const climbsRef = collection(db, collectionPath);
+
+        const unsubscribe = onSnapshot(
+            climbsRef,
+            (snapshot) => {
+                const allClimbs = snapshot.docs.map((doc) => doc.data());
+                const filteredClimbs = filterClimbs(allClimbs, activeView, label);
+                setClimbs(filteredClimbs);
+                setAnimationComplete(false);
+            },
+            () => {
+                Alert.alert('Error', 'Failed to fetch climbs. Please try again later.');
+            }
+        );
+
         return () => unsubscribe();
     }, [activeView, label]);
 
@@ -311,19 +325,25 @@ const filterClimbs = (allClimbs, view, labelVal) => {
             const currentWeek = getWeekStartAndEnd(today);
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+            const dayName = dayNames[dateObj.getDay()];
+
             return (
                 dateObj >= currentWeek.start &&
                 dateObj <= currentWeek.end &&
-                dayNames[dateObj.getDay()] === labelVal
+                dayName === labelVal
             );
         } else if (view === 'Month') {
             const monthNames = [
                 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
             ];
-            return monthNames[dateObj.getMonth()] === labelVal;
+            const climbMonth = monthNames[dateObj.getMonth()];
+
+            return climbMonth === labelVal;
         } else if (view === 'Year') {
-            return dateObj.getFullYear().toString() === labelVal;
+            const climbYear = dateObj.getFullYear().toString();
+
+            return climbYear === labelVal;
         }
         return false;
     });

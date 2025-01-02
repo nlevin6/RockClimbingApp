@@ -3,11 +3,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import { useGradingSystem } from './GradingContext';
-import { Text, View, Alert } from "react-native";
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import app from '../../firebaseConfig';
-
-const db = getFirestore(app);
+import { Text, View } from "react-native";
 
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
