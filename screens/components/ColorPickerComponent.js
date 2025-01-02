@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable, Aler
 import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
 import DraggableFlatList from 'react-native-draggable-flatlist';
+import { nanoid } from 'nanoid/non-secure';
 import tw from '../../tailwind';
 import { useGradingSystem } from './GradingContext';
 
@@ -52,7 +53,7 @@ const ColorPickerComponent = () => {
             return;
         }
         if (chromaticGrades.length < 13) {
-            const uniqueKey = `${Date.now()}-${Math.random()}`;
+            const uniqueKey = nanoid();
             setChromaticGrades([...chromaticGrades, { key: uniqueKey, color }]);
         }
     };
@@ -64,7 +65,7 @@ const ColorPickerComponent = () => {
     const deleteSelectedColor = () => {
         if (selectedColorIndex !== null) {
             const updatedColorBar = chromaticGrades.filter((_, index) => index !== selectedColorIndex);
-            setChromaticGrades(updatedColorBar);
+            setChromaticGrades(updatedColorBar.map((item) => ({ ...item, key: nanoid() })));
             setSelectedColorIndex(null);
         }
     };
@@ -80,11 +81,13 @@ const ColorPickerComponent = () => {
         return Math.max(20, blockSize);
     };
 
-    const onDragEnd = ({ data }) => {
-        setChromaticGrades(data);
-    };
-
     const blockSize = calculateBlockSize();
+
+    const onDragEnd = ({ data }) => {
+        // Reassign keys after drag to avoid key conflicts
+        const updatedData = data.map((item) => ({ ...item, key: nanoid() }));
+        setChromaticGrades(updatedData);
+    };
 
     return (
         <Pressable style={tw`p-4 bg-slate-900`} onPress={handleBackgroundPress}>
