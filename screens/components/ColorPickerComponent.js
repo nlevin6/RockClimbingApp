@@ -22,10 +22,10 @@ const ColorPickerComponent = () => {
     };
 
     const handleColorChange = useRef(debounce((selectedColor) => {
-    if (selectedColor) {
-        setTempColor((prev) => ({
-            ...prev,
-            h: selectedColor.h,
+        if (selectedColor) {
+            setTempColor((prev) => ({
+                ...prev,
+                h: selectedColor.h,
             }));
         }
     }, 100)).current;
@@ -68,6 +68,8 @@ const ColorPickerComponent = () => {
         if (chromaticGrades.length < 13) {
             const uniqueKey = nanoid();
             setChromaticGrades([...chromaticGrades, { key: uniqueKey, color }]);
+        } else {
+            Alert.alert('Limit Reached', 'You can only have up to 13 chromatic grades.');
         }
     };
 
@@ -157,7 +159,7 @@ const ColorPickerComponent = () => {
                             step={1}
                             value={tempColor.s}
                             onValueChange={handleSaturationChange}
-                            minimumTrackTintColor="rgb(167 139 250)"
+                            minimumTrackTintColor="rgb(167, 139, 250)"
                             maximumTrackTintColor="#ddd"
                             thumbTintColor="rgb(109, 40, 217)"
                         />
@@ -169,7 +171,7 @@ const ColorPickerComponent = () => {
                             step={1}
                             value={tempColor.v}
                             onValueChange={handleBrightnessChange}
-                            minimumTrackTintColor="rgb(167 139 250)"
+                            minimumTrackTintColor="rgb(167, 139, 250)"
                             maximumTrackTintColor="#ddd"
                             thumbTintColor="rgb(109, 40, 217)"
                         />

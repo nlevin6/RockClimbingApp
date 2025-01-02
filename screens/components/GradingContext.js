@@ -1,78 +1,88 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const GradingContext = createContext();
 
+export const useGradingSystem = () => useContext(GradingContext);
 
 export const GradingProvider = ({ children }) => {
     const [gradingSystem, setGradingSystem] = useState('Hueco (USA)');
     const [chromaticGrades, setChromaticGrades] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchGradingSettings = async () => {
-            const user = auth.currentUser;
-            if (!user) return;
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const settingsDocRef = doc(db, 'users', user.uid, 'settings', 'grading');
 
-            try {
-                const docRef = doc(db, `users/${user.uid}/settings`, 'grading');
-                const docSnap = await getDoc(docRef);
+                const unsubscribeFirestore = onSnapshot(
+                    settingsDocRef,
+                    (docSnapshot) => {
+                        if (docSnapshot.exists()) {
+                            const data = docSnapshot.data();
+                            setGradingSystem(data.gradingSystem || 'Hueco (USA)');
+                            setChromaticGrades(data.chromaticGrades || []);
+                        } else {
+                            setDoc(settingsDocRef, {
+                                gradingSystem: 'Hueco (USA)',
+                                chromaticGrades: [],
+                            });
+                            setGradingSystem('Hueco (USA)');
+                            setChromaticGrades([]);
+                        }
+                        setLoading(false);
+                    },
+                    () => {
+                        setLoading(false);
+                    }
+                );
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.gradingSystem) setGradingSystem(data.gradingSystem);
-                    if (data.chromaticGrades) setChromaticGrades(data.chromaticGrades);
-                }
-            } catch (error) {
-                console.error('Error fetching grading system:', error);
+                return () => unsubscribeFirestore();
+            } else {
+                setGradingSystem('Hueco (USA)');
+                setChromaticGrades([]);
+                setLoading(false);
             }
-        };
+        });
 
-        fetchGradingSettings();
+        return () => unsubscribeAuth();
     }, []);
 
     const updateGradingSystem = async (newSystem) => {
+        setGradingSystem(newSystem);
         const user = auth.currentUser;
-        if (!user) return;
-
-        try {
-            const docRef = doc(db, `users/${user.uid}/settings`, 'grading');
-            await setDoc(docRef, {
-                gradingSystem: newSystem,
-                chromaticGrades,
-            }, { merge: true });
-            setGradingSystem(newSystem);
-        } catch (error) {
-            console.error('Error saving grading system:', error);
+        if (user) {
+            const settingsDocRef = doc(db, 'users', user.uid, 'settings', 'grading');
+            try {
+                await setDoc(settingsDocRef, { gradingSystem: newSystem }, { merge: true });
+            } catch {}
         }
     };
 
-
-    const updateChromaticGrades = async (newChromaticGrades) => {
-        try {
-            const docRef = doc(db, 'settings', 'grading');
-            await setDoc(docRef, {
-                gradingSystem,
-                chromaticGrades: newChromaticGrades
-            }, { merge: true });
-            setChromaticGrades(newChromaticGrades);
-        } catch (error) {
-            console.error('Error saving chromatic grades:', error);
+    const updateChromaticGrades = async (newGrades) => {
+        setChromaticGrades(newGrades);
+        const user = auth.currentUser;
+        if (user) {
+            const settingsDocRef = doc(db, 'users', user.uid, 'settings', 'grading');
+            try {
+                await setDoc(settingsDocRef, { chromaticGrades: newGrades }, { merge: true });
+            } catch {}
         }
+    };
+
+    const value = {
+        gradingSystem,
+        setGradingSystem: updateGradingSystem,
+        chromaticGrades,
+        setChromaticGrades: updateChromaticGrades,
+        loading,
     };
 
     return (
-        <GradingContext.Provider
-            value={{
-                gradingSystem,
-                setGradingSystem: updateGradingSystem,
-                chromaticGrades,
-                setChromaticGrades: updateChromaticGrades
-            }}
-        >
-            {children}
+        <GradingContext.Provider value={value}>
+            {!loading && children}
         </GradingContext.Provider>
     );
 };
-
-export const useGradingSystem = () => useContext(GradingContext);

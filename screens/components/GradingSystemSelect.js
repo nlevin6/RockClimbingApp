@@ -24,13 +24,13 @@ const GradingSystemSelect = () => {
         setLocalValue(gradingSystem);
     }, [gradingSystem]);
 
-    const handleChangeValue = async (value) => {
+    const handleChangeValue = (value) => {
         setGradingSystem(value);
         setLocalValue(value);
     };
 
     return (
-        <View style={tw` px-4 bg-slate-900`}>
+        <View style={tw`px-4 bg-slate-900`}>
             <Text style={tw`text-violet-200 text-lg mb-2`}>Grading System</Text>
             <DropDownPicker
                 open={gradingOpen}
@@ -40,7 +40,8 @@ const GradingSystemSelect = () => {
                 setValue={setLocalValue}
                 setItems={setGradingItems}
                 onChangeValue={handleChangeValue}
-                style={tw`rounded-2xl bg-slate-900 border border-slate-700`}
+                placeholder="Select Grade"
+                style={tw`mb-2 mt-2 rounded-2xl bg-slate-900 border border-slate-700`}
                 dropDownContainerStyle={tw`rounded-2xl bg-slate-900 border border-slate-700`}
                 textStyle={tw`text-violet-200`}
                 ArrowDownIconComponent={CustomArrowDown}
