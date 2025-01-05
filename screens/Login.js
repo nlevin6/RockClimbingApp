@@ -45,7 +45,7 @@ const Login = () => {
             return;
         }
 
-        setLoading(true); // Start loading
+        setLoading(true);
 
         createUserWithEmailAndPassword(auth, email, password)
             .then(() => {
