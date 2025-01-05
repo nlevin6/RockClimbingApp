@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    ActivityIndicator
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import tw from '../../tailwind';
@@ -10,14 +20,26 @@ const ChangePassword = () => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
     const handleChangePassword = () => {
+        if (!newPassword || !confirmPassword) {
+            Alert.alert('Error', 'Both password fields are required.');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            Alert.alert('Error', 'New password must be at least 6 characters long.');
+            return;
+        }
+
         if (newPassword !== confirmPassword) {
             Alert.alert('Error', 'New password and confirmation do not match.');
             return;
         }
 
+        setLoading(true);
         const user = auth.currentUser;
 
         if (user) {
@@ -36,21 +58,26 @@ const ChangePassword = () => {
                     });
                 })
                 .catch((error) => {
-                    if (error.code === 'auth/invalid-credential') {
-                        Alert.alert('Error', 'Invalid credentials. Please try again.');
+                    if (error.code === 'auth/wrong-password') {
+                        Alert.alert('Error', 'The current password is incorrect.');
+                    } else if (error.code === 'auth/weak-password') {
+                        Alert.alert('Error', 'The new password is too weak. Please choose a stronger password.');
                     } else {
                         Alert.alert('Error', 'Failed to update password. Please try again.');
                     }
-                });
+                })
+                .finally(() => setLoading(false));
         } else {
             Alert.alert('Error', 'User is not authenticated.');
+            setLoading(false);
         }
     };
+
 
     return (
         <KeyboardAvoidingView
             style={tw`flex-1 bg-slate-900`}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjusts behavior based on platform
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView contentContainerStyle={tw`flex-grow justify-center items-center px-4`}>
                 <TouchableOpacity
@@ -88,12 +115,16 @@ const ChangePassword = () => {
                 <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
                     {'Password must be at least 6 characters long'}
                 </Text>
-                <TouchableOpacity
-                    style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
-                    onPress={handleChangePassword}
-                >
-                    <Text style={tw`text-white text-center font-bold`}>Update Password</Text>
-                </TouchableOpacity>
+                {loading ? (
+                    <ActivityIndicator size="small" color="#8B5CF6" style={tw`w-3/4 p-3 mb-4`} />
+                ) : (
+                    <TouchableOpacity
+                        style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
+                        onPress={handleChangePassword}
+                    >
+                        <Text style={tw`text-white text-center font-bold`}>Update Password</Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </KeyboardAvoidingView>
     );
