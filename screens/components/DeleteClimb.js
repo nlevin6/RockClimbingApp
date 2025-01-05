@@ -15,20 +15,16 @@ const isHexColor = (str) => /^#([0-9A-F]{3}){1,2}$/i.test(str);
 
 const DeleteClimb = () => {
     const { gradingSystem, chromaticGrades } = useGradingSystem();
-
     const [gradingItems, setGradingItems] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState(null);
-
     const [dateItems, setDateItems] = useState([{ label: 'Select', value: null }]);
     const [selectedDate, setSelectedDate] = useState(null);
-
     const [gradeOpen, setGradeOpen] = useState(false);
     const [dateOpen, setDateOpen] = useState(false);
-
     const [climbs, setClimbs] = useState([]);
     const [filteredClimbs, setFilteredClimbs] = useState([]);
-
     const [loadingDelete, setLoadingDelete] = useState(null);
+
     useEffect(() => {
         const user = auth.currentUser;
         if (!user) return;
@@ -39,16 +35,17 @@ const DeleteClimb = () => {
                 ...doc.data(),
             }));
 
-            setClimbs(climbsData);
+            const sortedClimbs = climbsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            setClimbs(sortedClimbs);
+
             const uniqueDates = [
                 { label: 'Select', value: null },
-                ...Array.from(new Set(climbsData.map((c) => new Date(c.date).toDateString())))
-                    .sort((a, b) => new Date(b) - new Date(a))
+                ...Array.from(new Set(sortedClimbs.map((c) => new Date(c.date).toDateString())))
                     .map((d) => ({ label: d, value: d })),
             ];
             setDateItems(uniqueDates);
 
-            filterClimbs(climbsData, selectedGrade, selectedDate);
+            filterClimbs(sortedClimbs, selectedGrade, selectedDate);
         });
 
         return () => unsubscribe();
@@ -94,10 +91,7 @@ const DeleteClimb = () => {
             newBaseItems = chromaticGrades.map((item) => item.color);
         } else {
             const systemGrades = gradingSystems[gradingSystem] || [];
-
-            newBaseItems = systemGrades.map((gradeObj) =>
-                gradeObj.value ?? gradeObj
-            );
+            newBaseItems = systemGrades.map((gradeObj) => gradeObj.value ?? gradeObj);
         }
 
         const mappedItems = newBaseItems.map((grade) => {
@@ -193,59 +187,62 @@ const DeleteClimb = () => {
                 zIndexInverse={100}
             />
 
-            <FlatList
-                data={filteredClimbs}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={tw`flex-row justify-between items-center mb-2`}>
-                        <View style={tw`flex-row items-center`}>
-                            {isHexColor(item.grade) ? (
-                                <>
-                                    <View
-                                        style={[
-                                            {
-                                                width: 20,
-                                                height: 20,
-                                                borderRadius: 4,
-                                                backgroundColor: item.grade,
-                                                marginRight: 8,
-                                            },
-                                        ]}
-                                    />
+            <View style={tw`border border-violet-600 rounded-lg p-4 flex-1`}>
+                <FlatList
+                    data={filteredClimbs}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <View style={tw`flex-row justify-between items-center mb-2`}>
+                            <View style={tw`flex-row items-center`}>
+                                {isHexColor(item.grade) ? (
+                                    <>
+                                        <View
+                                            style={[
+                                                {
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: 4,
+                                                    backgroundColor: item.grade,
+                                                    marginRight: 8,
+                                                },
+                                            ]}
+                                        />
+                                        <Text style={tw`text-violet-200`}>
+                                            {new Date(item.date).toDateString()}
+                                        </Text>
+                                    </>
+                                ) : (
                                     <Text style={tw`text-violet-200`}>
-                                        {new Date(item.date).toDateString()}
+                                        {item.grade} - {new Date(item.date).toDateString()}
                                     </Text>
-                                </>
-                            ) : (
-                                <Text style={tw`text-violet-200`}>
-                                    {item.grade} - {new Date(item.date).toDateString()}
-                                </Text>
-                            )}
-                        </View>
+                                )}
+                            </View>
 
-                        <TouchableOpacity
-                            onPress={() => handleDelete(item.id)}
-                            style={tw`p-2 rounded-2xl ${
-                                loadingDelete === item.id ? 'bg-gray-600' : 'bg-red-600'
-                            }`}
-                            disabled={loadingDelete === item.id}
-                        >
-                            {loadingDelete === item.id ? (
-                                <ActivityIndicator size="small" color="#FFFFFF" />
-                            ) : (
-                                <Text style={tw`text-white font-bold`}>Delete</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-                ListEmptyComponent={
-                    <Text style={tw`text-gray-400 text-center mt-4`}>
-                        No climbs match the selected criteria.
-                    </Text>
-                }
-            />
+                            <TouchableOpacity
+                                onPress={() => handleDelete(item.id)}
+                                style={tw`p-2 rounded-2xl ${
+                                    loadingDelete === item.id ? 'bg-gray-600' : 'bg-red-600'
+                                }`}
+                                disabled={loadingDelete === item.id}
+                            >
+                                {loadingDelete === item.id ? (
+                                    <ActivityIndicator size="small" color="#FFFFFF" />
+                                ) : (
+                                    <Text style={tw`text-white font-bold`}>Delete</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    ListEmptyComponent={
+                        <Text style={tw`text-gray-400 text-center mt-4`}>
+                            No climbs match the selected criteria.
+                        </Text>
+                    }
+                />
+            </View>
         </View>
     );
+
 };
 
 export default DeleteClimb;
