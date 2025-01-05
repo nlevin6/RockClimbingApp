@@ -162,7 +162,7 @@ const ClimbForm = () => {
                 zIndex={3000}
             />
             <View style={tw`flex-row justify-between mt-4`}>
-                <View style={[tw`flex-1 mr-1`, { zIndex: 2000 }]}>
+                <View style={[tw`flex-1 mr-1`]}>
                     <DropDownPicker
                         open={dayOpen}
                         value={day}
@@ -179,10 +179,11 @@ const ClimbForm = () => {
                         textStyle={tw`text-violet-200`}
                         ArrowDownIconComponent={CustomArrowDown}
                         ArrowUpIconComponent={CustomArrowUp}
+                        zIndex={2000}
                     />
                 </View>
 
-                <View style={[tw`flex-1 mx-1`, { zIndex: 1500 }]}>
+                <View style={[tw`flex-1 mx-1`]}>
                     <DropDownPicker
                         open={monthOpen}
                         value={month}
@@ -199,10 +200,11 @@ const ClimbForm = () => {
                         textStyle={tw`text-violet-200`}
                         ArrowDownIconComponent={CustomArrowDown}
                         ArrowUpIconComponent={CustomArrowUp}
+                        zIndex={1500}
                     />
                 </View>
 
-                <View style={[tw`flex-1 ml-1`, { zIndex: 1000 }]}>
+                <View style={[tw`flex-1 ml-1`]}>
                     <DropDownPicker
                         open={yearOpen}
                         value={year}
@@ -219,6 +221,7 @@ const ClimbForm = () => {
                         textStyle={tw`text-violet-200`}
                         ArrowDownIconComponent={CustomArrowDown}
                         ArrowUpIconComponent={CustomArrowUp}
+                        zIndex={1000}
                     />
                 </View>
             </View>
