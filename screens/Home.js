@@ -15,9 +15,12 @@ const Home = () => {
     return (
         <ScrollView style={tw`flex-1 bg-slate-900`}>
             <View style={tw`flex-1`}>
-                <View style={tw`mt-12 mb-8 justify-center text-center`}>
+                <View style={tw`mt-12 justify-center text-center`}>
                     <BarGraph onBarSelect={handleBarSelect} />
                 </View>
+                <Text style={tw`-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
+                    {'Tap on a bar to view detailed stats'}
+                </Text>
 
                 <View style={tw`bg-gray-800 p-4 rounded-t-3xl`}>
                     <Text style={tw`text-violet-500 text-2xl font-bold mb-2`}>Climbing Stats</Text>
