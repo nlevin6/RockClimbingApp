@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Keyboard } from 'react-native';
+import {
+    Text,
+    TextInput,
+    TouchableOpacity,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Keyboard,
+    ActivityIndicator,
+    View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -8,7 +19,9 @@ import tw from '../tailwind';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const navigation = useNavigation();
 
@@ -27,16 +40,32 @@ const Login = () => {
 
     const handleRegister = () => {
         Keyboard.dismiss();
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Passwords do not match.');
+            return;
+        }
+
+        setLoading(true); // Start loading
+
         createUserWithEmailAndPassword(auth, email, password)
-            .then(() => alert('User registered successfully!'))
+            .then(() => {
+                Alert.alert('Success', 'User registered successfully!');
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+                setIsRegistering(false);
+            })
             .catch((error) => {
                 const errorMessage = getCustomErrorMessage(error.code);
-                alert(errorMessage);
-            });
+                Alert.alert('Error', errorMessage);
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleLogin = () => {
         Keyboard.dismiss();
+        setLoading(true);
+
         signInWithEmailAndPassword(auth, email, password)
             .then(() => {
                 navigation.reset({
@@ -44,7 +73,11 @@ const Login = () => {
                     routes: [{ name: 'Home' }],
                 });
             })
-            .catch((error) => Alert.alert('Login Failed', error.message));
+            .catch((error) => {
+                const errorMessage = getCustomErrorMessage(error.code);
+                Alert.alert('Login Failed', errorMessage);
+            })
+            .finally(() => setLoading(false));
     };
 
     return (
@@ -65,32 +98,50 @@ const Login = () => {
                     keyboardType="email-address"
                 />
                 <TextInput
-                    style={tw`w-3/4 p-3 mb-1 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                    style={tw`w-3/4 p-3 mb-4 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
                     placeholder="Password"
                     placeholderTextColor="#64748B"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
-                <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
+                {isRegistering && (
+                    <TextInput
+                        style={tw`w-3/4 p-3 mb-6 border border-slate-700 rounded-2xl bg-slate-900 text-violet-200`}
+                        placeholder="Confirm Password"
+                        placeholderTextColor="#64748B"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                    />
+                )}
+                <Text style={tw`-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
                     {'Password must be at least 6 characters long'}
                 </Text>
-                <TouchableOpacity
-                    style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
-                    onPress={isRegistering ? handleRegister : handleLogin}
-                >
-                    <Text style={tw`text-white text-center font-bold`}>
-                        {isRegistering ? 'Register' : 'Login'}
-                    </Text>
-                </TouchableOpacity>
+
+                {loading ? (
+                    <ActivityIndicator size="small" color="#8B5CF6" style={tw`mt-6 mb-4`} />
+                ) : (
+                    <TouchableOpacity
+                        style={tw`w-3/4 p-3 mb-4 rounded-2xl bg-violet-800`}
+                        onPress={isRegistering ? handleRegister : handleLogin}
+                    >
+                        <Text style={tw`text-white text-center font-bold`}>
+                            {isRegistering ? 'Register' : 'Login'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+
                 <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
                     <Text style={tw`text-violet-300`}>
                         {isRegistering ? 'Already have an account? Log in' : 'Don\'t have an account? Register'}
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                    <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
-                </TouchableOpacity>
+                {!isRegistering && (
+                    <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                        <Text style={tw`text-violet-300 mb-6 mt-6`}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </KeyboardAvoidingView>
     );
