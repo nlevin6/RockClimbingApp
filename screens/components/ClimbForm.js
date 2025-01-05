@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-na
 import DropDownPicker from 'react-native-dropdown-picker';
 import { collection, addDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
 import tw from '../../tailwind';
 import { auth, db } from '../../firebaseConfig';
 import { useGradingSystem } from './GradingContext';
@@ -11,7 +12,7 @@ import gradingSystems from '../constants/gradingSystems';
 const CustomArrowDown = () => <Ionicons name="chevron-down" size={20} color="#8b5cf6" />;
 const CustomArrowUp = () => <Ionicons name="chevron-up" size={20} color="#8b5cf6" />;
 
-const ClimbForm = ({ navigation }) => {
+const ClimbForm = () => {
     const { gradingSystem, chromaticGrades } = useGradingSystem();
 
     let gradeItems = [];
@@ -38,7 +39,14 @@ const ClimbForm = ({ navigation }) => {
     const [grade, setGrade] = useState(gradeItems[0]?.value || null);
     const [gradeOpen, setGradeOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+
+    const successOpacity = useSharedValue(0);
+    const successScale = useSharedValue(0);
+
+    const animatedCheckmarkStyle = useAnimatedStyle(() => ({
+        opacity: successOpacity.value,
+        transform: [{ scale: successScale.value }],
+    }));
 
     const today = new Date();
     const currentDay = today.getDate();
@@ -89,19 +97,6 @@ const ClimbForm = ({ navigation }) => {
         }
     }, [month, year]);
 
-    useEffect(() => {
-        if (gradingSystem === 'Chromatic') {
-            const updatedChromaticItems = chromaticGrades.map((item, index) => ({
-                label: `Color ${index + 1}: ${item.color}`,
-                value: item.color,
-            }));
-            setGrade(updatedChromaticItems[0]?.value || null);
-        } else {
-            const standardItems = gradingSystems[gradingSystem] || [];
-            setGrade(standardItems[0]?.value || null);
-        }
-    }, [gradingSystem, chromaticGrades]);
-
     const resetDropdowns = (except) => {
         if (except !== 'grade') setGradeOpen(false);
         if (except !== 'day') setDayOpen(false);
@@ -131,8 +126,13 @@ const ClimbForm = ({ navigation }) => {
                 grade,
                 date: selectedDate.toISOString(),
             });
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 2000);
+
+            successOpacity.value = withSpring(1);
+            successScale.value = withSpring(1);
+            setTimeout(() => {
+                successOpacity.value = withDelay(500, withSpring(0));
+                successScale.value = withDelay(500, withSpring(0));
+            }, 2000);
         } catch (error) {
             Alert.alert('Error', 'Failed to add climb. Please try again.');
             console.error(error);
@@ -144,7 +144,6 @@ const ClimbForm = ({ navigation }) => {
     return (
         <View style={tw`p-4 bg-slate-900`}>
             <Text style={tw`text-violet-600 mb-2 text-xl font-bold`}>Add Climb</Text>
-
             <DropDownPicker
                 open={gradeOpen}
                 value={grade}
@@ -162,7 +161,6 @@ const ClimbForm = ({ navigation }) => {
                 ArrowUpIconComponent={CustomArrowUp}
                 zIndex={3000}
             />
-
             <View style={tw`flex-row justify-between mt-4`}>
                 <View style={[tw`flex-1 mr-1`, { zIndex: 2000 }]}>
                     <DropDownPicker
@@ -224,21 +222,21 @@ const ClimbForm = ({ navigation }) => {
                     />
                 </View>
             </View>
-
             <View style={tw`flex-row justify-center mt-2`}>
                 <TouchableOpacity
                     onPress={handleSubmit}
                     style={tw`bg-violet-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl flex-row justify-center items-center`}
                 >
                     {loading ? (
-                        <ActivityIndicator size="small" color="#8B5CF6" />
+                        <ActivityIndicator size="small" color="#FFFFFF" />
                     ) : (
-                        <>
-                            <Text style={tw`text-white font-bold text-center text-sm mr-2`}>Add</Text>
-                            {success && <Ionicons name="checkmark-circle" size={20} color="#22C55E" />}
-                        </>
+                        <Text style={tw`text-white font-bold text-center text-sm mr-2`}>Add</Text>
                     )}
+                    <Animated.View style={[tw`ml-2`, animatedCheckmarkStyle]}>
+                        <Ionicons name="checkmark-circle" size={20} color="#22C55E" />
+                    </Animated.View>
                 </TouchableOpacity>
+
             </View>
         </View>
     );
