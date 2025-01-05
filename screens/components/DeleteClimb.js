@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ const DeleteClimb = () => {
     const [climbs, setClimbs] = useState([]);
     const [filteredClimbs, setFilteredClimbs] = useState([]);
 
+    const [loadingDelete, setLoadingDelete] = useState(null);
     useEffect(() => {
         const user = auth.currentUser;
         if (!user) return;
@@ -72,10 +73,12 @@ const DeleteClimb = () => {
                     text: 'Delete',
                     onPress: async () => {
                         try {
+                            setLoadingDelete(id);
                             await deleteDoc(doc(db, `users/${user.uid}/climbs`, id));
-                            Alert.alert('Success', 'Climb deleted successfully!');
                         } catch {
                             Alert.alert('Error', 'Failed to delete climb');
+                        } finally {
+                            setLoadingDelete(null);
                         }
                     },
                     style: 'destructive',
@@ -222,9 +225,16 @@ const DeleteClimb = () => {
 
                         <TouchableOpacity
                             onPress={() => handleDelete(item.id)}
-                            style={tw`bg-red-600 p-2 rounded-2xl`}
+                            style={tw`p-2 rounded-2xl ${
+                                loadingDelete === item.id ? 'bg-gray-600' : 'bg-red-600'
+                            }`}
+                            disabled={loadingDelete === item.id}
                         >
-                            <Text style={tw`text-white font-bold`}>Delete</Text>
+                            {loadingDelete === item.id ? (
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                            ) : (
+                                <Text style={tw`text-white font-bold`}>Delete</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
                 )}
