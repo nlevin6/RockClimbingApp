@@ -1,15 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Modal,
-    StyleSheet,
-    Image,
-    Pressable,
-    Alert,
-    ActivityIndicator
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, Pressable, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { ColorWheel } from 'react-native-color-wheel';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -17,8 +7,6 @@ import { nanoid } from 'nanoid/non-secure';
 import tw from '../../tailwind';
 import { useGradingSystem } from './GradingContext';
 import { debounce } from 'lodash';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
-import { Ionicons } from "@expo/vector-icons";
 
 const ColorPickerComponent = () => {
     const { chromaticGrades, setChromaticGrades } = useGradingSystem();
@@ -28,16 +16,6 @@ const ColorPickerComponent = () => {
     const [selectedColorIndex, setSelectedColorIndex] = useState(null);
     const [localSaturation, setLocalSaturation] = useState(tempColor.s);
     const [localBrightness, setLocalBrightness] = useState(tempColor.v);
-    const [loading, setLoading] = useState(false);
-    const [deleting, setDeleting] = useState(false); // Loading state for deleting
-
-    const successOpacity = useSharedValue(0);
-    const successScale = useSharedValue(0);
-
-    const animatedCheckmarkStyle = useAnimatedStyle(() => ({
-        opacity: successOpacity.value,
-        transform: [{ scale: successScale.value }],
-    }));
 
     const toggleModal = () => {
         setIsModalVisible(!isModalVisible);
@@ -88,23 +66,12 @@ const ColorPickerComponent = () => {
             return;
         }
         if (chromaticGrades.length < 13) {
-            setLoading(true);
             const uniqueKey = nanoid();
             setChromaticGrades([...chromaticGrades, { key: uniqueKey, color }]);
-
-            successOpacity.value = withSpring(1);
-            successScale.value = withSpring(1);
-
-            setTimeout(() => {
-                successOpacity.value = withDelay(500, withSpring(0));
-                successScale.value = withDelay(500, withSpring(0));
-                setLoading(false);
-            }, 500);
         } else {
             Alert.alert('Limit Reached', 'You can only have up to 13 chromatic grades.');
         }
     };
-
 
     const handleColorPress = (index) => {
         setSelectedColorIndex(index);
@@ -112,13 +79,9 @@ const ColorPickerComponent = () => {
 
     const deleteSelectedColor = () => {
         if (selectedColorIndex !== null) {
-            setDeleting(true);
-            setTimeout(() => {
-                const updatedColorBar = chromaticGrades.filter((_, index) => index !== selectedColorIndex);
-                setChromaticGrades(updatedColorBar.map((item) => ({ ...item, key: nanoid() })));
-                setSelectedColorIndex(null);
-                setDeleting(false);
-            }, 500);
+            const updatedColorBar = chromaticGrades.filter((_, index) => index !== selectedColorIndex);
+            setChromaticGrades(updatedColorBar.map((item) => ({ ...item, key: nanoid() })));
+            setSelectedColorIndex(null);
         }
     };
 
@@ -163,14 +126,10 @@ const ColorPickerComponent = () => {
             />
             {selectedColorIndex !== null && (
                 <TouchableOpacity
-                    style={tw`mt-2 mb-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl flex-row justify-center items-center`}
+                    style={tw`mt-2 mb-4 bg-red-600 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl`}
                     onPress={deleteSelectedColor}
                 >
-                    {deleting ? (
-                        <ActivityIndicator size="small" color="#FFFFFF" />
-                    ) : (
-                        <Text style={tw`text-white font-bold text-center text-sm`}>Delete Grade</Text>
-                    )}
+                    <Text style={tw`text-white font-bold text-center text-sm`}>Delete Grade</Text>
                 </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -178,19 +137,10 @@ const ColorPickerComponent = () => {
                 onPress={toggleModal}
             />
             <TouchableOpacity
-                style={tw`mt-4 bg-violet-700 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl flex-row justify-center items-center`}
+                style={tw`mt-4 bg-violet-700 p-2 rounded w-full px-4 py-2 mx-auto rounded-2xl`}
                 onPress={addColorToBar}
             >
-                {loading ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                    <>
-                        <Text style={tw`text-white font-bold text-center text-sm mr-2`}>Add Grade</Text>
-                        <Animated.View style={animatedCheckmarkStyle}>
-                            <Ionicons name="checkmark-circle" size={20} color="#22C55E" />
-                        </Animated.View>
-                    </>
-                )}
+                <Text style={tw`text-white font-bold text-center text-sm`}>Add Grade</Text>
             </TouchableOpacity>
             <Modal visible={isModalVisible} transparent={true} animationType="slide">
                 <View style={tw`flex-1 justify-center items-center bg-black bg-opacity-50`}>
