@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import tw from '../../tailwind';
 import { auth, db } from '../../firebaseConfig';
@@ -37,6 +37,9 @@ const ClimbForm = ({ navigation }) => {
 
     const [grade, setGrade] = useState(gradeItems[0]?.value || null);
     const [gradeOpen, setGradeOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.getMonth() + 1;
@@ -112,9 +115,12 @@ const ClimbForm = ({ navigation }) => {
             return;
         }
 
+        setLoading(true);
+
         const selectedDate = new Date(year, month - 1, day);
         const user = auth.currentUser;
         if (!user) {
+            setLoading(false);
             Alert.alert('Error', 'You must be logged in to add a climb.');
             return;
         }
@@ -125,13 +131,15 @@ const ClimbForm = ({ navigation }) => {
                 grade,
                 date: selectedDate.toISOString(),
             });
-            Alert.alert('Success', 'Climb added successfully!');
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 2000);
         } catch (error) {
             Alert.alert('Error', 'Failed to add climb. Please try again.');
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
-
 
     return (
         <View style={tw`p-4 bg-slate-900`}>
@@ -220,9 +228,16 @@ const ClimbForm = ({ navigation }) => {
             <View style={tw`flex-row justify-center mt-2`}>
                 <TouchableOpacity
                     onPress={handleSubmit}
-                    style={tw`bg-violet-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl`}
+                    style={tw`bg-violet-600 p-2 rounded w-full px-4 py-2 mx-2 rounded-2xl flex-row justify-center items-center`}
                 >
-                    <Text style={tw`text-white font-bold text-center text-sm`}>Add</Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#8B5CF6" />
+                    ) : (
+                        <>
+                            <Text style={tw`text-white font-bold text-center text-sm mr-2`}>Add</Text>
+                            {success && <Ionicons name="checkmark-circle" size={20} color="#22C55E" />}
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
         </View>
