@@ -161,7 +161,7 @@ const BarGraph = ({ onBarSelect }) => {
                             style={{
                                 data: { fill: 'rgb(124, 58, 237)' },
                             }}
-                            labels={({ datum }) => `${datum.value}`}
+                            labels={({ datum }) => String(datum.value)}
                             labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
                             events={[
                                 {
