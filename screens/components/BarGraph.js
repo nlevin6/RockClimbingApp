@@ -124,17 +124,12 @@ const BarGraph = ({onBarSelect}) => {
         setClimbData(aggregatedData);
         setGraphKey((prevKey) => prevKey + 1);
 
-        //--------------------------------------------------------------------
-        //  ⬇️  Automatically select the most recent weekly day if 'Week' view
-        //--------------------------------------------------------------------
         if (activeView === 'Week' && aggregatedData && aggregatedData.length > 0) {
             const dayMapping = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const todayName = dayMapping[new Date().getDay()];
 
-            // Try to find today's bar if it has any climbs
             let defaultSelection = aggregatedData.find((d) => d.day === todayName && d.value > 0);
 
-            // If today's bar has 0 climbs or doesn't exist, pick the first day that has climbs
             if (!defaultSelection) {
                 defaultSelection = aggregatedData.find((d) => d.value > 0) || aggregatedData[0];
             }
