@@ -115,9 +115,11 @@ const Login = () => {
                         secureTextEntry
                     />
                 )}
-                <Text style={tw`-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
-                    {'Password must be at least 6 characters long'}
-                </Text>
+                {isRegistering && (
+                    <Text style={tw`w-3/4 p-1 text-xs mb-6 text-slate-500 text-center`}>
+                        {'Password must be at least 6 characters long'}
+                    </Text>
+                )}
 
                 {loading ? (
                     <ActivityIndicator size="small" color="#8B5CF6" style={tw`mt-6 mb-4`} />
