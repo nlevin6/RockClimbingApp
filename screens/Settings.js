@@ -7,6 +7,7 @@ import { useGradingSystem } from './components/GradingContext';
 import { signOut, deleteUser } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import the icon library
 
 const Settings = () => {
     const { gradingSystem } = useGradingSystem();
@@ -78,22 +79,25 @@ const Settings = () => {
             </View>
             <View style={tw`p-4 space-y-4`}>
                 <TouchableOpacity
-                    style={tw`bg-violet-600 bg-opacity-30 py-3 rounded-3xl items-center border border-violet-600 mb-2`}
+                    style={tw`bg-violet-500 bg-opacity-30 py-2 rounded-3xl flex-row items-center justify-start pl-4 mb-2`}
                     onPress={() => navigation.navigate('ChangePassword')}
                 >
-                    <Text style={tw`text-violet-600 text-lg font-bold`}>Change Password</Text>
+                    <Icon name="lock-reset" size={20} color="rgb(139, 92, 246)" style={tw`mr-2`} />
+                    <Text style={tw`text-white text-lg font-semibold`}>Change Password</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={tw`bg-red-500 bg-opacity-30 py-3 rounded-3xl border border-red-600 items-center mb-2`}
+                    style={tw`bg-violet-500 bg-opacity-30 py-2 rounded-3xl flex-row items-center justify-start pl-4 mb-2`}
                     onPress={handleLogout}
                 >
-                    <Text style={tw`text-red-600 text-lg font-bold`}>Logout</Text>
+                    <Icon name="logout" size={20} color="rgb(139, 92, 246)" style={tw`mr-2`} />
+                    <Text style={tw`text-white text-lg font-semibold`}>Sign Out</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                    style={tw`bg-red-700 bg-opacity-30 py-3 rounded-3xl border border-red-700 items-center`}
+                    style={tw`py-3 items-center`}
                     onPress={handleDeleteAccount}
                 >
-                    <Text style={tw`text-red-700 text-lg font-bold`}>Delete Account</Text>
+                    <Text style={tw`text-red-500 text-sm font-bold`}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
         </View>
