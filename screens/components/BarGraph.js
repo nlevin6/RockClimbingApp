@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from 'victory-native';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../../firebaseConfig';
+import React, {useState, useEffect} from 'react';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
+import {VictoryBar, VictoryChart, VictoryAxis, VictoryLabel} from 'victory-native';
+import {collection, onSnapshot} from 'firebase/firestore';
+import {auth, db} from '../../firebaseConfig';
 import tw from '../../tailwind';
 
-const BarGraph = ({ onBarSelect }) => {
+const BarGraph = ({onBarSelect}) => {
     const [activeView, setActiveView] = useState('Week');
     const [climbData, setClimbData] = useState([]);
     const [graphKey, setGraphKey] = useState(0);
@@ -47,7 +47,7 @@ const BarGraph = ({ onBarSelect }) => {
             endOfWeek.setDate(startOfWeek.getDate() + 6);
             endOfWeek.setHours(23, 59, 59, 999);
 
-            const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+            const dayCounts = {Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0};
 
             data.forEach((climb) => {
                 if (!climb.date) {
@@ -69,8 +69,24 @@ const BarGraph = ({ onBarSelect }) => {
                 value: dayCounts[key],
             }));
         } else if (activeView === 'Month') {
-            const currentYear = today.getFullYear();
-            const monthCounts = Array(12).fill(0);
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const past12Months = [];
+            const today = new Date();
+            let currentMonth = today.getMonth();
+            let currentYear = today.getFullYear();
+
+            for (let i = 0; i < 12; i++) {
+                past12Months.unshift({
+                    month: monthNames[currentMonth],
+                    year: currentYear,
+                    count: 0,
+                });
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+            }
 
             data.forEach((climb) => {
                 if (!climb.date) {
@@ -80,16 +96,19 @@ const BarGraph = ({ onBarSelect }) => {
                 if (isNaN(climbDate)) {
                     return;
                 }
-                if (climbDate.getFullYear() === currentYear) {
-                    const month = climbDate.getMonth();
-                    monthCounts[month] += 1;
-                }
+                const climbMonth = climbDate.getMonth();
+                const climbYear = climbDate.getFullYear();
+
+                past12Months.forEach((entry) => {
+                    if (entry.month === monthNames[climbMonth] && entry.year === climbYear) {
+                        entry.count += 1;
+                    }
+                });
             });
 
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            aggregatedData = monthCounts.map((value, index) => ({
-                day: monthNames[index],
-                value,
+            aggregatedData = past12Months.map((entry) => ({
+                day: `${entry.month}`,
+                value: entry.count,
             }));
         } else if (activeView === 'Year') {
             const yearCounts = {};
@@ -141,33 +160,33 @@ const BarGraph = ({ onBarSelect }) => {
                 {climbData.length > 0 ? (
                     <VictoryChart
                         key={graphKey}
-                        domainPadding={{ x: 30 }}
-                        padding={{ top: 20, bottom: 30, left: 20, right: 20 }}
-                        animate={{ duration: 500 }}
+                        domainPadding={{x: 30}}
+                        padding={{top: 20, bottom: 30, left: 20, right: 20}}
+                        animate={{duration: 500}}
                         height={300}
                     >
                         <VictoryAxis
                             style={{
-                                axis: { stroke: '#fff', strokeWidth: 2 },
-                                tickLabels: { fontSize: 12, fill: '#fff' },
+                                axis: {stroke: '#fff', strokeWidth: 2},
+                                tickLabels: {fontSize: 12, fill: '#fff'},
                             }}
                         />
                         <VictoryBar
                             data={climbData}
                             x="day"
                             y="value"
-                            barWidth={15}
-                            cornerRadius={{ top: 5 }}
+                            barWidth={25}
+                            cornerRadius={{top: 5}}
                             style={{
-                                data: { fill: 'rgb(124, 58, 237)' },
+                                data: {fill: 'rgb(124, 58, 237)'},
                             }}
-                            labels={({ datum }) => String(datum.value)}
-                            labelComponent={<VictoryLabel dy={-10} style={{ fill: 'white', fontSize: 12 }} />}
+                            labels={({datum}) => String(datum.value)}
+                            labelComponent={<VictoryLabel dy={-10} style={{fill: 'white', fontSize: 12}}/>}
                             events={[
                                 {
                                     target: 'data',
                                     eventHandlers: {
-                                        onPressIn: (event, { datum }) => {
+                                        onPressIn: (event, {datum}) => {
                                             if (onBarSelect) {
                                                 onBarSelect({
                                                     view: activeView,
