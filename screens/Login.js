@@ -49,11 +49,13 @@ const Login = () => {
 
         createUserWithEmailAndPassword(auth, email, password)
             .then(() => {
-                Alert.alert('Success', 'User registered successfully!');
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('');
-                setIsRegistering(false);
+                return signInWithEmailAndPassword(auth, email, password);
+            })
+            .then(() => {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Home' }],
+                });
             })
             .catch((error) => {
                 const errorMessage = getCustomErrorMessage(error.code);
