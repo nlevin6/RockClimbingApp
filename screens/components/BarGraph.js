@@ -50,13 +50,10 @@ const BarGraph = ({onBarSelect}) => {
             const dayCounts = {Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0};
 
             data.forEach((climb) => {
-                if (!climb.date) {
-                    return;
-                }
+                if (!climb.date) return;
                 const climbDate = new Date(climb.date);
-                if (isNaN(climbDate)) {
-                    return;
-                }
+                if (isNaN(climbDate)) return;
+
                 if (climbDate >= startOfWeek && climbDate <= endOfWeek) {
                     const day = climbDate.getDay();
                     const dayMapping = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -89,13 +86,10 @@ const BarGraph = ({onBarSelect}) => {
             }
 
             data.forEach((climb) => {
-                if (!climb.date) {
-                    return;
-                }
+                if (!climb.date) return;
                 const climbDate = new Date(climb.date);
-                if (isNaN(climbDate)) {
-                    return;
-                }
+                if (isNaN(climbDate)) return;
+
                 const climbMonth = climbDate.getMonth();
                 const climbYear = climbDate.getFullYear();
 
@@ -113,13 +107,10 @@ const BarGraph = ({onBarSelect}) => {
         } else if (activeView === 'Year') {
             const yearCounts = {};
             data.forEach((climb) => {
-                if (!climb.date) {
-                    return;
-                }
+                if (!climb.date) return;
                 const climbDate = new Date(climb.date);
-                if (isNaN(climbDate)) {
-                    return;
-                }
+                if (isNaN(climbDate)) return;
+
                 const year = climbDate.getFullYear();
                 yearCounts[year] = (yearCounts[year] || 0) + 1;
             });
@@ -132,6 +123,30 @@ const BarGraph = ({onBarSelect}) => {
 
         setClimbData(aggregatedData);
         setGraphKey((prevKey) => prevKey + 1);
+
+        //--------------------------------------------------------------------
+        //  ⬇️  Automatically select the most recent weekly day if 'Week' view
+        //--------------------------------------------------------------------
+        if (activeView === 'Week' && aggregatedData && aggregatedData.length > 0) {
+            const dayMapping = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const todayName = dayMapping[new Date().getDay()];
+
+            // Try to find today's bar if it has any climbs
+            let defaultSelection = aggregatedData.find((d) => d.day === todayName && d.value > 0);
+
+            // If today's bar has 0 climbs or doesn't exist, pick the first day that has climbs
+            if (!defaultSelection) {
+                defaultSelection = aggregatedData.find((d) => d.value > 0) || aggregatedData[0];
+            }
+
+            if (defaultSelection && onBarSelect) {
+                onBarSelect({
+                    view: activeView,
+                    label: defaultSelection.day,
+                    count: defaultSelection.value,
+                });
+            }
+        }
     };
 
     const handleViewChange = (view) => {
@@ -181,7 +196,7 @@ const BarGraph = ({onBarSelect}) => {
                                 data: {fill: 'rgb(124, 58, 237)'},
                             }}
                             labels={({datum}) => String(datum.value)}
-                            labelComponent={<VictoryLabel dy={-10} style={{fill: 'white', fontSize: 12}}/>}
+                            labelComponent={<VictoryLabel dy={-10} style={{fill: 'white', fontSize: 12}} />}
                             events={[
                                 {
                                     target: 'data',
